@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'backend.irrigacao',
     'backend.dashboard',
     'backend.fazenda',
+    'backend.usuarios',
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
