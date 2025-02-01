@@ -1,6 +1,9 @@
 from django.db import models
+from backend.fazenda.models import Fazenda
+
 
 class DadosClimaticos(models.Model):
+    fazenda = models.ForeignKey(Fazenda, on_delete=models.CASCADE, default=1)  # Substitua '1' pelo ID da fazenda padrão
     temperatura = models.FloatField()
     umidade = models.FloatField()
     precipitacao = models.FloatField()
