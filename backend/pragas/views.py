@@ -2,14 +2,17 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.generics import ListAPIView
+from django_filters.rest_framework import DjangoFilterBackend
 from .models import Praga
 from .serializers import PragaSerializer
+from .filters import PragaFilter
 import tensorflow as tf
 from tensorflow.keras.applications import MobileNet
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.applications.mobilenet import preprocess_input, decode_predictions
 import numpy as np
 
+# Carregar o modelo de IA uma única vez na inicialização
 model = MobileNet(weights='imagenet')
 
 class UploadPragaView(APIView):
@@ -42,3 +45,5 @@ class UploadPragaView(APIView):
 class ListPragasView(ListAPIView):
     queryset = Praga.objects.all().order_by('-data_criacao')
     serializer_class = PragaSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = PragaFilter
