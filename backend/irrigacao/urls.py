@@ -11,4 +11,5 @@ urlpatterns = [
     path('', irrigacao_home, name='irrigacao-home'), 
     path('clima/', ConsultaClimaView.as_view(), name='consulta-clima'),
     path('dados/', DadosClimaticosListView.as_view(), name='listar-dados-climaticos'),
+    path('sugestao-irrigacao/<int:fazenda_id>/', SugestaoIrrigacaoView.as_view(), name='sugestao-irrigacao'),
 ]
