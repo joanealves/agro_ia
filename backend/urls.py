@@ -1,17 +1,33 @@
-from django.contrib import admin
-from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
-from django.views.generic import RedirectView  
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Agro API",
+        default_version='v1',
+        description="API para gestão agrícola",
+    ),
+    public=True,
+)
 
 urlpatterns = [
+    # Admin
     path('admin/', admin.site.urls),
-    path('pragas/', include('backend.pragas.urls')),  
-    path('pragas', RedirectView.as_view(url='pragas/')),  
-    path('irrigacao/', include('backend.irrigacao.urls')),
-    path('dashboard/', include('backend.dashboard.urls')),
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),  
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    
+    # API Documentation
+    path('api/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('api/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    
+    # API Endpoints
+    path('api/auth/', include([
+        path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),  
+        path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    ])),
+    
     path('api/usuarios/', include('backend.usuarios.urls')),
+    path('api/pragas/', include('backend.pragas.urls')),
+    path('api/irrigacao/', include('backend.irrigacao.urls')),
+    path('api/dashboard/', include('backend.dashboard.urls')),
+    
+    # Redirects para evitar erros
+    path('api/pragas', RedirectView.as_view(url='/api/pragas/')),
+    path('api/irrigacao', RedirectView.as_view(url='/api/irrigacao/')),
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
