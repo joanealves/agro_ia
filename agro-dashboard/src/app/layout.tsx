@@ -1,4 +1,4 @@
-import "./globals.css"; // Caminho correto dentro do App Router
+import "./globals.css"; 
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 
