@@ -31,8 +31,11 @@ INSTALLED_APPS = [
     'backend.dashboard',
     'backend.fazenda',
     'backend.usuarios',
+    'backend.produtividade',
+    'backend.notificacoes',
     'rest_framework',
     'rest_framework_simplejwt',
+    'drf_yasg',
     'corsheaders',
     'django_filters',
 ]
@@ -87,7 +90,7 @@ DATABASES = {
         'USER': 'root',     
         'PASSWORD': '101023',   
         'HOST': 'localhost',      
-        'PORT': '3306',            
+        'PORT': '3307',            
     }
 }
 

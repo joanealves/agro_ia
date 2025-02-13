@@ -1,3 +1,12 @@
+from django.contrib import admin
+from django.urls import path, include
+from rest_framework.permissions import AllowAny
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework.routers import DefaultRouter
+
+# Configuração do Swagger/OpenAPI
 schema_view = get_schema_view(
     openapi.Info(
         title="Agro API",
@@ -5,7 +14,11 @@ schema_view = get_schema_view(
         description="API para gestão agrícola",
     ),
     public=True,
+    permission_classes=[AllowAny],
 )
+
+# Cria um router para as viewsets
+router = DefaultRouter()
 
 urlpatterns = [
     # Admin
@@ -25,9 +38,7 @@ urlpatterns = [
     path('api/pragas/', include('backend.pragas.urls')),
     path('api/irrigacao/', include('backend.irrigacao.urls')),
     path('api/dashboard/', include('backend.dashboard.urls')),
-    
-    # Redirects para evitar erros
-    path('api/pragas', RedirectView.as_view(url='/api/pragas/')),
-    path('api/irrigacao', RedirectView.as_view(url='/api/irrigacao/')),
-    
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('api/produtividade/', include('backend.produtividade.urls')),
+    path('api/notificacoes/', include('backend.notificacoes.urls')), 
+    path('', include(router.urls)),  
+]

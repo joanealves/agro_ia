@@ -1,30 +1,27 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status
-from rest_framework.response import Response
+from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from .models import Fazenda
 from .serializers import FazendaSerializer
 
 class FazendaViewSet(viewsets.ModelViewSet):
+    queryset = Fazenda.objects.none()  # Correção crítica
     serializer_class = FazendaSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['nome', 'localizacao']
 
     def get_queryset(self):
-        """Retorna apenas as fazendas pertencentes ao usuário autenticado."""
         return Fazenda.objects.filter(usuario=self.request.user)
 
     def perform_create(self, serializer):
-        """Define o usuário autenticado como dono da fazenda ao criá-la."""
         serializer.save(usuario=self.request.user)
 
     def retrieve(self, request, *args, **kwargs):
-        """Impede acesso a fazendas de outros usuários."""
         instance = self.get_object()
         if instance.usuario != request.user:
-            raise PermissionDenied("Você não tem permissão para acessar esta fazenda.")
+            raise PermissionDenied("Acesso negado.")
         return super().retrieve(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):

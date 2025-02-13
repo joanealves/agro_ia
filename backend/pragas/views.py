@@ -9,7 +9,7 @@ from django.core.files.storage import default_storage
 from .serializers import PragaSerializer
 from .filters import PragaFilter
 from rest_framework.pagination import PageNumberPagination
-import tensorflow as tf
+import tensorflow as tf 
 from tensorflow.keras.applications import MobileNet
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.applications.mobilenet import preprocess_input, decode_predictions
@@ -38,13 +38,24 @@ class UploadPragaView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = PragaSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(usuario=request.user)  # Associa o usuário logado
+            # Salva a praga no banco de dados
+            serializer.save(usuario=request.user)
             imagem_path = serializer.instance.imagem.path
 
-            # Envia a tarefa para o Celery
-            processar_imagem_praga.delay(imagem_path)
+            # Processa a imagem de forma síncrona
+            try:
+                img = image.load_img(imagem_path, target_size=(224, 224))
+                img_array = image.img_to_array(img)
+                img_array = np.expand_dims(img_array, axis=0)
+                img_array = preprocess_input(img_array)
+                predictions = model.predict(img_array)
+                decoded_predictions = decode_predictions(predictions, top=3)[0]
+                resultados = [{"label": label, "description": description, "probability": float(prob)}
+                              for (_, label, description, prob) in decoded_predictions]
+            except Exception as e:
+                resultados = {"error": str(e)}
 
-            return Response({"praga": serializer.data, "message": "Imagem em processamento."}, status=201)
+            return Response({"praga": serializer.data, "resultados": resultados}, status=201)
         return Response(serializer.errors, status=400)
 
 class PragaPagination(PageNumberPagination):

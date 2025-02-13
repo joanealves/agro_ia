@@ -1,3 +1,4 @@
+from django.db import models  # Adicione esta importação
 from django.contrib.auth import get_user_model
 from backend.fazenda.models import Fazenda
 
