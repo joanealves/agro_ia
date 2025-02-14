@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'backend.usuarios',
     'backend.produtividade',
     'backend.notificacoes',
+    'backend.maps',
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_yasg',

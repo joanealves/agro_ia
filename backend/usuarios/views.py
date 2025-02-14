@@ -6,7 +6,7 @@ from .models import Fazenda
 from .serializers import FazendaSerializer
 
 class FazendaViewSet(viewsets.ModelViewSet):
-    queryset = Fazenda.objects.none()  # Correção crítica
+    queryset = Fazenda.objects.none()  
     serializer_class = FazendaSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
