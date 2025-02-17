@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-export default function Home() {
+export default function Page() {  
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-8">
       <div className="text-center">

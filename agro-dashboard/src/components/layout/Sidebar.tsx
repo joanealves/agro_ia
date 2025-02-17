@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-import { Home, File, Map, Droplet, Bell, Leaf, Menu, ChevronLeft, ChevronRight } from "lucide-react";
+import { Home, File, Map, Droplet, Bell, Leaf, ChevronLeft, ChevronRight } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface SidebarItemProps {
   icon: React.ElementType;
@@ -9,10 +10,19 @@ interface SidebarItemProps {
 }
 
 const SidebarItem = ({ icon: Icon, text, isOpen }: SidebarItemProps) => (
-  <div className="flex items-center gap-3 p-3 hover:bg-gray-700 rounded-md cursor-pointer">
-    <Icon className="w-5 h-5 text-white" />
-    {isOpen && <span className="text-white">{text}</span>}
-  </div>
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <div className="flex items-center gap-3 p-3 hover:bg-gray-700 rounded-md cursor-pointer">
+        <Icon className="w-5 h-5 text-white" />
+        {isOpen && <span className="text-white">{text}</span>}
+      </div>
+    </TooltipTrigger>
+    {!isOpen && (
+      <TooltipContent side="right" className="bg-gray-900 text-white border-gray-700">
+        {text}
+      </TooltipContent>
+    )}
+  </Tooltip>
 );
 
 const Sidebar = () => {
@@ -31,13 +41,15 @@ const Sidebar = () => {
           {isOpen ? <ChevronLeft /> : <ChevronRight />}
         </button>
 
-        {/* Sidebar Items */}
-        <SidebarItem icon={Home} text="Pragas" isOpen={isOpen} />
-        <SidebarItem icon={File} text="Relatórios" isOpen={isOpen} />
-        <SidebarItem icon={Map} text="Mapas" isOpen={isOpen} />
-        <SidebarItem icon={Leaf} text="Fazendas" isOpen={isOpen} />
-        <SidebarItem icon={Droplet} text="Irrigações" isOpen={isOpen} />
-        <SidebarItem icon={Bell} text="Notificações" isOpen={isOpen} />
+        <TooltipProvider>
+          {/* Sidebar Items */}
+          <SidebarItem icon={Home} text="Pragas" isOpen={isOpen} />
+          <SidebarItem icon={File} text="Relatórios" isOpen={isOpen} />
+          <SidebarItem icon={Map} text="Mapas" isOpen={isOpen} />
+          <SidebarItem icon={Leaf} text="Fazendas" isOpen={isOpen} />
+          <SidebarItem icon={Droplet} text="Irrigações" isOpen={isOpen} />
+          <SidebarItem icon={Bell} text="Notificações" isOpen={isOpen} />
+        </TooltipProvider>
       </div>
     </div>
   );

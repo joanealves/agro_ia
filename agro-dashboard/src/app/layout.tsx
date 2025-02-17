@@ -1,14 +1,16 @@
-import "./globals.css"; 
-import Sidebar from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
+import { AuthProvider } from '@/app/providers/AuthProvider';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="pt-BR">
       <body>
-        <Header />
-        <Sidebar />
-        <main>{children}</main>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

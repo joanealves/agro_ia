@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import api from "@/lib/api"; // Ajuste aqui se necessário
+import {api}  from "@/lib/api"; 
 import { useRouter } from "next/navigation";
 
 interface User {
@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const { data } = await api.get("/auth/me"); // Rota que verifica se o usuário está autenticado
+        const { data } = await api.get("/auth/me"); 
         setUser(data);
       } catch (error) {
         setUser(null);
