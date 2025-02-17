@@ -10,8 +10,8 @@ import iconShadow from "leaflet/dist/images/marker-shadow.png";
 const DefaultIcon = L.icon({
   iconUrl: icon.src,
   shadowUrl: iconShadow.src,
-  iconSize: [25, 41], // Tamanho do ícone
-  iconAnchor: [12, 41], // Ponto de ancoragem do ícone
+  iconSize: [25, 41], 
+  iconAnchor: [12, 41], 
 });
 
 L.Marker.prototype.options.icon = DefaultIcon;
@@ -23,7 +23,7 @@ interface Farm {
   longitude: number;
 }
 
-// Componente para controlar o centro do mapa
+// controlar o centro do mapa
 function SetMapCenter({ center }: { center: [number, number] }) {
   const map = useMap();
   map.setView(center, map.getZoom());
@@ -48,12 +48,12 @@ export default function FarmMap() {
 
   return (
     <MapContainer
-      center={initialCenter} // Coordenadas iniciais do mapa
+      center={initialCenter} 
       zoom={5}
       style={{ height: "400px", width: "100%" }}
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      <SetMapCenter center={initialCenter} /> {/* Controla o centro do mapa */}
+      <SetMapCenter center={initialCenter} /> 
       {farms.map((farm) => (
         <Marker key={farm.id} position={[farm.latitude, farm.longitude]}>
           <Popup>{farm.nome}</Popup>

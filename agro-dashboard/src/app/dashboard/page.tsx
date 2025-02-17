@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
-import FarmMap from "@/components/maps/FarmMap";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -20,21 +19,13 @@ export default function DashboardPage() {
   return (
     <div className="flex h-screen bg-background text-foreground">
       <Sidebar />
-      <main className="flex-1 p-6">
+      <div className="flex-1 overflow-y-auto">
         <Header />
-        <h1 className="text-3xl font-bold">Bem-vindo, {user?.name}!</h1>
-        {user?.role === "admin" ? (
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Painel do Administrador</h2>
-            {/* Conteúdo específico para admin */}
-          </div>
-        ) : (
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Painel do Usuário</h2>
-            <FarmMap />
-          </div>
-        )}
-      </main>
+        <main className="p-6">
+          <h1 className="text-3xl font-bold">Bem-vindo, {user?.name}!</h1>
+          <p className="mt-4">Este é o painel do usuário.</p>
+        </main>
+      </div>
     </div>
   );
 }

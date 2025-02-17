@@ -1,62 +1,49 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
-import axios from "@/lib/api"; 
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useAuth } from "@/app/providers/AuthProvider";
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: "admin" | "user";
-}
+export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { login } = useAuth();
+  const router = useRouter();
 
-interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      axios.get("/auth/me", { headers: { Authorization: `Bearer ${token}` } })
-        .then((res) => setUser(res.data))
-        .catch(() => logout());
-    }
-    setLoading(false);
-  }, []);
-
-  const login = async (email: string, password: string) => {
+  const handleLogin = async () => {
     try {
-      const { data } = await axios.post("/auth/login", { email, password });
-      localStorage.setItem("token", data.token);
-      setUser(data.user);
+      await login(email, password);
+      router.push("/dashboard");
     } catch (error) {
-      console.error("Erro ao fazer login", error);
+      console.error("Erro ao fazer login:", error);
     }
-  };
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
-      {children}
-    </AuthContext.Provider>
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+      <div className="bg-card p-8 rounded-lg shadow-lg">
+        <h1 className="text-2xl font-bold mb-6">Login</h1>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-2 mb-4 border rounded"
+        />
+        <input
+          type="password"
+          placeholder="Senha"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-2 mb-4 border rounded"
+        />
+        <button
+          onClick={handleLogin}
+          className="w-full bg-primary text-primary-foreground font-bold py-2 px-4 rounded"
+        >
+          Entrar
+        </button>
+      </div>
+    </div>
   );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth deve ser usado dentro de AuthProvider");
-  return context;
-};
+}

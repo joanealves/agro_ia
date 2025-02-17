@@ -8,7 +8,7 @@ export default function Home() {
         <h1 className="text-4xl font-bold mb-4">Bem-vindo ao AgroTech</h1>
         <p className="text-lg mb-8">Soluções inteligentes para o agronegócio</p>
         <Image
-          src="/agro-tech-image.jpg" // Substitua pelo caminho da sua imagem
+          src="/agro-tech-image.jpg" 
           alt="AgroTech"
           width={800}
           height={450}
