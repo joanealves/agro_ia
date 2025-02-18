@@ -1,35 +1,39 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LucideIcon } from "lucide-react";
+import React from 'react';
 
+// Definindo as props do componente StatCard
 interface StatCardProps {
   title: string;
   value: string | number;
-  description?: string;
-  icon: LucideIcon;
-  trend?: {
-    value: number;
-    isPositive: boolean;
-  };
+  icon: React.ElementType; // Aceita um componente de ícone
+  trend?: { value: number; isPositive: boolean }; // Opcional
+  description: string;
+  className?: string; // Adicionando a propriedade className
 }
 
-export function StatCard({ title, value, description, icon: Icon, trend }: StatCardProps) {
+// Componente StatCard
+const StatCard: React.FC<StatCardProps> = ({
+  title,
+  value,
+  icon: Icon,
+  trend,
+  description,
+  className,
+}) => {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        {description && (
-          <p className="text-xs text-muted-foreground">{description}</p>
-        )}
-        {trend && (
-          <div className={`text-xs ${trend.isPositive ? 'text-green-500' : 'text-red-500'}`}>
-            {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    <div className={`p-6 rounded-lg shadow-md ${className}`}>
+      <div className="flex items-center gap-2">
+        <Icon className="w-6 h-6" /> {/* Renderiza o ícone */}
+        <h3 className="text-lg font-semibold">{title}</h3>
+      </div>
+      <p className="text-2xl font-bold mt-2">{value}</p>
+      {trend && (
+        <p className={`text-sm ${trend.isPositive ? 'text-green-500' : 'text-red-500'}`}>
+          {trend.isPositive ? '+' : '-'}{trend.value}%
+        </p>
+      )}
+      <p className="text-sm text-gray-500 mt-2">{description}</p>
+    </div>
   );
-}
+};
+
+export default StatCard;
