@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from .models import Fazenda
+from django.contrib.auth.models import User
 
-class FazendaSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Fazenda
-        fields = '__all__'
+        model = User
+        fields = ['id', 'username', 'email', 'is_staff']

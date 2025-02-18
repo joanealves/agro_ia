@@ -1,3 +1,4 @@
+from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -9,6 +10,7 @@ from django.core.files.storage import default_storage
 from .serializers import PragaSerializer
 from .filters import PragaFilter
 from rest_framework.pagination import PageNumberPagination
+from rest_framework import viewsets
 import tensorflow as tf 
 from tensorflow.keras.applications import MobileNet
 from tensorflow.keras.preprocessing import image
@@ -69,3 +71,17 @@ class ListPragasView(ListAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = PragaFilter
     pagination_class = PragaPagination
+    
+class PragaViewSet(viewsets.ModelViewSet):
+    queryset = Praga.objects.all()
+    serializer_class = PragaSerializer
+
+    @action(detail=True, methods=['patch'])
+    def atualizar_status(self, request, pk=None):
+        praga = self.get_object()
+        novo_status = request.data.get('status')
+        if novo_status not in ['pendente', 'resolvido']:
+            return Response({"erro": "Status inválido"}, status=400)
+        praga.status = novo_status
+        praga.save()
+        return Response({"status": "Status atualizado com sucesso"})    

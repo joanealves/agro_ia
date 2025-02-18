@@ -1,6 +1,6 @@
 from django.urls import path
 from django.http import JsonResponse
-from .views import ConsultaClimaView, SugestaoIrrigacaoView  # Remover DadosClimaticosListView
+from .views import ConsultaClimaView, SugestaoIrrigacaoView  
 
 def irrigacao_home(request):
     return JsonResponse({"message": "Bem-vindo ao sistema de irrigação!"})

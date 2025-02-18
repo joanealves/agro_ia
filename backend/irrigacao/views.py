@@ -1,12 +1,22 @@
 import requests
 import os
+from rest_framework.decorators import action
+from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from .models import DadosClimaticos
-from .serializers import DadosClimaticosSerializer
+from .models import Irrigacao
+from backend.irrigacao.serializers import DadosClimaticosSerializer
+from backend.irrigacao.serializers import IrrigacaoSerializer 
+from rest_framework import generics, permissions  
+from rest_framework.permissions import AllowAny  
+from django.contrib.auth.models import User
+from backend.usuarios.serializers import UserSerializer
+
 
 load_dotenv()
 
@@ -77,3 +87,37 @@ class SugestaoIrrigacaoView(APIView):
             },
             "sugestoes": sugestoes if sugestoes else ["Irrigação normal"]
         })
+    
+class IrrigacaoViewSet(viewsets.ModelViewSet):
+    queryset = Irrigacao.objects.all()
+    serializer_class = IrrigacaoSerializer
+
+    @action(detail=True, methods=['patch'])
+    def atualizar_status(self, request, pk=None):
+        irrigacao = self.get_object()
+        novo_status = request.data.get('status')
+        if novo_status not in ['ativo', 'inativo']:
+            return Response({"erro": "Status inválido"}, status=400)
+        irrigacao.status = novo_status
+        irrigacao.save()
+        return Response({"status": "Status atualizado com sucesso"})
+    
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        user = User.objects.create_user(
+            username=request.data['username'],
+            password=request.data['password'],
+            email=request.data.get('email', ''),
+        )
+        return Response({"status": "Usuário criado com sucesso"})
+
+class MeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
