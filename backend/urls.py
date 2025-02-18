@@ -41,5 +41,6 @@ urlpatterns = [
     path('api/produtividade/', include('backend.produtividade.urls')),
     path('api/notificacoes/', include('backend.notificacoes.urls')), 
     path('api/maps/', include('backend.maps.urls')),
+    path('api/fazenda/', include('backend.fazenda.urls')),
     path('', include(router.urls)),  
 ]
