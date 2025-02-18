@@ -7,7 +7,6 @@ import { getCurrentUser } from '@/lib/auth'
 import  Sidebar  from './Sidebar'
 import {Header} from './Header'
 import { User } from '@/lib/auth'
-
 interface MainLayoutProps {
   children: React.ReactNode
 }
@@ -59,8 +58,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
       {/* Sidebar para mobile */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+        <div className="fixed inset-0 z-40 bg-black/50 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}

@@ -7,7 +7,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR" className="dark"> {/* Adicionado className="dark" para forçar tema escuro */}
+    <html lang="pt-BR" className="dark"> 
       <body className="bg-background">
         <AuthProvider>{children}</AuthProvider>
       </body>

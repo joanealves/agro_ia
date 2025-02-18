@@ -5,33 +5,31 @@ import { Button } from "@/components/ui/button";
 
 export default function Page() {
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-      <div className="grid grid-cols-1 md:grid-cols-2 w-full max-w-6xl">
-        {/* Imagem */}
-        <div className="flex items-center justify-center p-8">
-          <Image
-            src={agroTechImage}
-            alt="AgroTech"
-            width={800}
-            height={450}
-            className="rounded-lg object-cover w-full h-auto shadow-xl"
-          />
-        </div>
+    <div className="min-h-screen bg-background text-foreground relative">
+      {/* Imagem de fundo */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src={agroTechImage}
+          alt="AgroTech"
+          layout="fill"
+          objectFit="cover"
+          className="rounded-2xl"
+        />
+      </div>
 
-        {/* Texto e botão */}
-        <div className="flex flex-col items-center justify-center p-8 bg-secondary rounded-lg shadow-lg">
-          <div className="text-center max-w-md">
-            <h1 className="text-4xl font-bold mb-4">Bem-vindo ao AgroTech</h1>
-            <p className="text-lg mb-8">
-              Soluções inteligentes para o agronegócio. Gerencie sua fazenda de
-              forma eficiente, aumente a produtividade e tome decisões baseadas em dados.
-            </p>
-            <Link href="/login">
-              <Button className="bg-primary hover:bg-primary/80 text-primary-foreground px-6 py-3 text-lg">
-                Acessar Plataforma
-              </Button>
-            </Link>
-          </div>
+      {/* Board com texto e botão */}
+      <div className="absolute inset-0 z-10 flex items-center justify-center">
+        <div className="bg-black bg-opacity-20 p-8 rounded-2xl shadow-2xl max-w-md text-center">
+          <h1 className="text-4xl font-bold mb-4 text-white">Bem-vindo ao AgroTech</h1>
+          <p className="text-lg mb-8 text-white">
+            Soluções inteligentes para o agronegócio. Gerencie sua fazenda de
+            forma eficiente, aumente a produtividade e tome decisões baseadas em dados.
+          </p>
+          <Link href="/login">
+            <Button className="bg-primary hover:bg-primary/80 text-primary-foreground px-6 py-3 text-lg rounded-lg shadow-md">
+              Acessar Plataforma
+            </Button>
+          </Link>
         </div>
       </div>
     </div>
