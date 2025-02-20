@@ -27,10 +27,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const checkUser = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      
       try {
-        const { data } = await api.get("/auth/me"); 
+        const { data } = await api.get("/auth/me/");  
         setUser(data);
       } catch (error) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
         setUser(null);
       } finally {
         setLoading(false);
@@ -38,7 +46,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     checkUser();
-  }, []);
+}, []);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
