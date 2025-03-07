@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { getCurrentUser, loginUser, logoutUser } from "../../lib/auth";
 
@@ -22,8 +22,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Rotas que não precisam de autenticação
-const publicRoutes = ['/login', '/register'];
+const publicRoutes = ["/login", "/register"];
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -32,7 +31,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Função para verificar se o usuário está autenticado
   const checkAuth = async (): Promise<boolean> => {
     try {
       const userData = await getCurrentUser();
@@ -53,28 +51,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Verificação de autenticação e redirecionamento baseado na rota
   useEffect(() => {
     const initialize = async () => {
       if (!initializing) return;
       setInitializing(false);
       setLoading(true);
-      
+
       try {
-        // Verificar se o usuário está autenticado
         const isAuthenticated = await checkAuth();
-        
-        // Verificar se a rota atual é pública
-        const isPublicRoute = publicRoutes.some(route => pathname?.startsWith(route));
-        
-        // Lógica de redirecionamento
+        const isPublicRoute = publicRoutes.some((route) =>
+          pathname?.startsWith(route)
+        );
+
         if (!isAuthenticated && !isPublicRoute) {
-          // Se não estiver autenticado e a rota não for pública, redireciona para login
-          console.log("Usuário não autenticado, redirecionando para login...");
           router.replace("/login");
-        } else if (isAuthenticated && isPublicRoute && pathname !== '/register') {
-          // Se autenticado e em rota pública (exceto registro), redirecione para dashboard/admin
-          if (user?.role === 'admin') {
+        } else if (isAuthenticated && isPublicRoute && pathname !== "/register") {
+          if (user?.role === "admin") {
             router.replace("/admin");
           } else {
             router.replace("/dashboard");
@@ -82,8 +74,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       } catch (error) {
         console.error("Erro na inicialização do auth:", error);
-        // Em caso de erro em rotas protegidas, redireciona para login
-        if (!publicRoutes.some(route => pathname?.startsWith(route))) {
+        if (!publicRoutes.some((route) => pathname?.startsWith(route))) {
           router.replace("/login");
         }
       } finally {
@@ -94,32 +85,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     initialize();
   }, [pathname]);
 
-  // Função de login
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<void> => {
     setLoading(true);
     try {
       const data = await loginUser({ email, password });
-      
-      // Verificar se a resposta contém dados do usuário
+
       if (data.user) {
         setUser(data.user);
       } else {
-        // Se o login for bem-sucedido mas não retornar dados do usuário,
-        // buscar os dados do usuário separadamente
         const userData = await getCurrentUser();
         if (userData) {
           setUser(userData);
         }
       }
-      
-      // Redirecionar com base no papel do usuário
-      if (user?.role === 'admin' || data.user?.role === 'admin') {
+
+      if (user?.role === "admin" || data.user?.role === "admin") {
         router.push("/admin");
       } else {
         router.push("/dashboard");
       }
-      
-      return data;
     } catch (error) {
       console.error("Erro ao fazer login:", error);
       throw error;
@@ -128,8 +112,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Função de logout
-  const logout = async () => {
+  const logout = async (): Promise<void> => {
     setLoading(true);
     try {
       await logoutUser();
@@ -137,17 +120,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       router.replace("/login");
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
-      // Mesmo em caso de erro, redireciona para login
       router.replace("/login");
     } finally {
       setLoading(false);
     }
   };
 
+  const contextValue = useMemo(
+    () => ({ user, loading, login, logout, checkAuth }),
+    [user, loading]
+  );
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, checkAuth }}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 };
 
