@@ -19,7 +19,7 @@ schema_view = get_schema_view(
 router = DefaultRouter()
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls),  # Certifique-se de que esta linha não está duplicada
     
     # API Documentation
     path('api/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
@@ -34,6 +34,6 @@ urlpatterns = [
     path('api/notificacoes/', include('backend.notificacoes.urls')), 
     path('api/maps/', include('backend.maps.urls')),
     path('api/fazenda/', include('backend.fazenda.urls')),
-    path('api/auth/', include('backend.auth.urls')),  
+    path('api/auth/', include('backend.custom_auth.urls')),  
     path('', include(router.urls)),  
 ]

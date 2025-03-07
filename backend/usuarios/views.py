@@ -4,12 +4,10 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework import viewsets, permissions
 from django_filters.rest_framework import DjangoFilterBackend
-from django.contrib.auth.models import User
+from backend.custom_auth.models import CustomUser  
 from .models import Fazenda
 from backend.fazenda.serializers import FazendaSerializer
-from backend.usuarios.serializers import UserSerializer
-
-
+from backend.usuarios.serializers import CustomUserSerializer  
 
 class FazendaViewSet(viewsets.ModelViewSet):
     queryset = Fazenda.objects.none()  
@@ -39,12 +37,12 @@ class FazendaViewSet(viewsets.ModelViewSet):
     
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+    queryset = CustomUser.objects.all() 
+    serializer_class = CustomUserSerializer  
     permission_classes = [permissions.IsAdminUser]
 
     def create(self, request, *args, **kwargs):
-        user = User.objects.create_user(
+        user = CustomUser.objects.create_user(
             username=request.data['username'],
             password=request.data['password'],
             email=request.data.get('email', ''),

@@ -1,8 +1,8 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 
 class Notificacao(models.Model):
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notificacoes')
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notificacoes')  # Usa settings.AUTH_USER_MODEL
     mensagem = models.TextField()
     tipo = models.CharField(max_length=20, choices=[('email', 'Email'), ('whatsapp', 'WhatsApp')])
     enviada_em = models.DateTimeField(auto_now_add=True)
