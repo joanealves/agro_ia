@@ -40,3 +40,54 @@ export function DashboardSidebar() {
     </aside>
   );
 }
+
+const Sidebar = () => {
+  return (
+    <div className="w-64 h-full bg-gray-800 text-white">
+      <div className="p-4">
+        <h2 className="text-2xl font-bold">Dashboard</h2>
+      </div>
+      <nav className="mt-4">
+        <ul>
+          <li>
+            <Link href="/dashboard/clima">
+              <a className="block p-4 hover:bg-gray-700">Clima</a>
+            </Link>
+          </li>
+          <li>
+            <Link href="/dashboard/fazendas">
+              <a className="block p-4 hover:bg-gray-700">Fazendas</a>
+            </Link>
+          </li>
+          <li>
+            <Link href="/dashboard/irrigacao">
+              <a className="block p-4 hover:bg-gray-700">Irrigação</a>
+            </Link>
+          </li>
+          <li>
+            <Link href="/dashboard/mapas">
+              <a className="block p-4 hover:bg-gray-700">Mapas</a>
+            </Link>
+          </li>
+          <li>
+            <Link href="/dashboard/pragas">
+              <a className="block p-4 hover:bg-gray-700">Pragas</a>
+            </Link>
+          </li>
+          <li>
+            <Link href="/dashboard/produtividade">
+              <a className="block p-4 hover:bg-gray-700">Produtividade</a>
+            </Link>
+          </li>
+          <li>
+            <Link href="/dashboard/admin">
+              <a className="block p-4 hover:bg-gray-700">Admin</a>
+            </Link>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  );
+};
+
+export default Sidebar;

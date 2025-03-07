@@ -1,7 +1,6 @@
-// app/login/page.tsx
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import Image from 'next/image'
@@ -9,15 +8,29 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { loginUser } from '@/lib/auth'
+import { useAuth } from '@/app/providers/AuthProvider'
+import Cookies from 'js-cookie'
 
 export default function LoginPage() {
   const router = useRouter()
+  const { login, user } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  // Verificar se o usuário já está autenticado
+  useEffect(() => {
+    if (user) {
+      // Se o usuário já estiver autenticado, redirecione
+      if (user.role === 'admin') {
+        router.replace('/admin')
+      } else {
+        router.replace('/dashboard')
+      }
+    }
+  }, [user, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,10 +38,14 @@ export default function LoginPage() {
     setError('')
 
     try {
-      await loginUser({ email, password })
-      router.push('/dashboard')
+      await login(email, password)
+      // Redirecionamento é tratado dentro da função login
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Falha na autenticação')
+      console.error('Login error:', err)
+      setError(
+        err.response?.data?.detail || 
+        'Falha no login. Verifique suas credenciais e tente novamente.'
+      )
     } finally {
       setLoading(false)
     }
@@ -41,7 +58,6 @@ export default function LoginPage() {
         <Card className="w-full max-w-md border-none bg-card/50 backdrop-blur-sm">
           <CardHeader className="space-y-1">
             <div className="flex items-center justify-center mb-4">
-              {/* Você pode substituir este SVG por seu logo */}
               <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
                 <svg
                   className="w-8 h-8 text-white"
@@ -141,11 +157,18 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-background to-transparent z-10" />
         <div className="absolute inset-0">
           <Image
-            src="/api/placeholder/1200/800"
+            src="/images/login-background.jpg"
             alt="Login"
             fill
             className="object-cover opacity-50"
             priority
+            onError={() => {
+              // Fallback para placeholder se a imagem não carregar
+              const imgElement = document.querySelector('.login-bg') as HTMLImageElement;
+              if (imgElement) {
+                imgElement.src = "/api/placeholder/1200/800";
+              }
+            }}
           />
         </div>
         <div className="relative z-20 h-full flex items-center justify-center p-12">
