@@ -151,7 +151,7 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_COOKIE': 'access',
     'AUTH_COOKIE_REFRESH': 'refresh',
-    'AUTH_COOKIE_SECURE': False,  
+    'AUTH_COOKIE_SECURE': True,  
     'AUTH_COOKIE_HTTP_ONLY': True,
     'AUTH_COOKIE_PATH': '/',
     'AUTH_COOKIE_SAMESITE': 'Lax',
