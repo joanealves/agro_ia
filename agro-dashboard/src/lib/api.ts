@@ -1,4 +1,3 @@
-// Arquivo: lib/api.ts
 
 import axios from 'axios';
 import { AxiosResponse, AxiosRequestConfig } from 'axios';
@@ -14,11 +13,15 @@ if (typeof process !== 'undefined' && process.env && !process.env.NEXT_PUBLIC_AP
   console.warn("⚠️ Atenção: NEXT_PUBLIC_API_URL não está definida! Usando 'http://localhost:8000' como fallback.");
 }
 
+
 const api = axios.create({
   baseURL: BASE_URL,
   headers: { "Content-Type": "application/json" },
-  withCredentials: true, // Importante para enviar/receber cookies
+  withCredentials: true, 
 });
+
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
 
 // Interceptor para adicionar token de autenticação em cada requisição
 api.interceptors.request.use((config) => {
