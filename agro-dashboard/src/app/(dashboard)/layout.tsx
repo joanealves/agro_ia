@@ -1,39 +1,34 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import  Header from '@/components/layout/Header';
-import Sidebar from '@/components/layout/Sidebar';
-import { getCurrentUser } from '@/lib/auth';
-import { User } from '@/lib/auth';
+import { useAuth } from "../../app/providers/AuthProvider";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user, loading } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const userData = await getCurrentUser();
-        setUser(userData);
-      } catch (error) {
-        console.error('Erro ao buscar usuário:', error);
-      }
-    };
+    if (!loading && !user) {
+      router.replace("/login");
+    }
+  }, [user, loading, router]);
 
-    fetchUser();
-  }, []);
-
-  if (!user) {
-    return null; 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        Carregando sessão...
+      </div>
+    );
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} user={user} />
-      <div className="flex h-screen pt-16">
-        <Sidebar />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        Redirecionando...
       </div>
-    </div>
-  );
+    );
+  }
+
+  return <>{children}</>;
 }

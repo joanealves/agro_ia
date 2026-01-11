@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import Image from 'next/image'
-import { Button } from '../../../components/ui/button'
-import { Input } from '../../../components/ui/input'
-import { Label } from '../../../components/ui/label'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../../components/ui/card'
-import { useAuth } from '../../../app/providers/AuthProvider'
+import { Button } from '../../components/ui/button'
+import { Input } from '../../components/ui/input'
+import { Label } from '../../components/ui/label'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card'
+import { useAuth } from '../providers/AuthProvider'
 import Cookies from 'js-cookie'
 
 export default function LoginPage() {
@@ -43,7 +43,7 @@ export default function LoginPage() {
     } catch (err: any) {
       console.error('Login error:', err)
       setError(
-        err.response?.data?.detail || 
+        err.response?.data?.detail ||
         'Falha no login. Verifique suas credenciais e tente novamente.'
       )
     } finally {
@@ -52,6 +52,7 @@ export default function LoginPage() {
   }
 
   return (
+
     <div className="min-h-screen bg-background flex">
       {/* Lado esquerdo - Área de login */}
       <div className="w-full md:w-1/2 flex items-center justify-center p-8">
@@ -131,8 +132,8 @@ export default function LoginPage() {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full bg-primary hover:bg-primary/90"
                 disabled={loading}
               >
@@ -140,8 +141,8 @@ export default function LoginPage() {
               </Button>
               <div className="text-sm text-center text-muted-foreground">
                 Não tem uma conta?{" "}
-                <a 
-                  href="/register" 
+                <a
+                  href="/register"
                   className="text-primary hover:text-primary/80 hover:underline"
                 >
                   Cadastre-se

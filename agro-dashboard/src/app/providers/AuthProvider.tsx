@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useMemo } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import Cookies from "js-cookie";
 import { getCurrentUser, loginUser, logoutUser } from "../../lib/auth";
 
 interface User {
@@ -17,129 +17,74 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  checkAuth: () => Promise<boolean>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const publicRoutes = ["/login", "/register"];
-
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [initializing, setInitializing] = useState(true);
-  const router = useRouter();
-  const pathname = usePathname();
 
-  const checkAuth = async (): Promise<boolean> => {
+  // ✅ só carrega usuário
+  const refreshUser = async () => {
     try {
-      const userData = await getCurrentUser();
-      if (userData) {
-        setUser({
-          ...userData,
-          role: userData.role as "admin" | "user",
-        });
-        return true;
-      } else {
+      const token = Cookies.get("access_token");
+      if (!token) {
         setUser(null);
-        return false;
+        return;
       }
-    } catch (error) {
-      console.error("Erro ao verificar usuário:", error);
+
+      const data = await getCurrentUser();
+      setUser(data ?? null);
+    } catch {
       setUser(null);
-      return false;
     }
   };
 
+  // ✅ roda uma vez ao iniciar a app
   useEffect(() => {
-    const initialize = async () => {
-      if (!initializing) return;
-      setInitializing(false);
-      setLoading(true);
+    refreshUser().finally(() => setLoading(false));
+  }, []);
 
-      try {
-        const isAuthenticated = await checkAuth();
-        const isPublicRoute = publicRoutes.some((route) =>
-          pathname?.startsWith(route)
-        );
-
-        if (!isAuthenticated && !isPublicRoute) {
-          router.replace("/login");
-        } else if (isAuthenticated && isPublicRoute && pathname !== "/register") {
-          if (user?.role === "admin") {
-            router.replace("/admin");
-          } else {
-            router.replace("/dashboard");
-          }
-        }
-      } catch (error) {
-        console.error("Erro na inicialização do auth:", error);
-        if (!publicRoutes.some((route) => pathname?.startsWith(route))) {
-          router.replace("/login");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initialize();
-  }, [pathname]);
-
-  const login = async (email: string, password: string): Promise<void> => {
+  // ✅ login só faz login
+  const login = async (email: string, password: string) => {
     setLoading(true);
     try {
       const data = await loginUser({ email, password });
-
-      if (data.user) {
-        setUser(data.user);
-      } else {
-        const userData = await getCurrentUser();
-        if (userData) {
-          setUser(userData);
-        }
-      }
-
-      if (user?.role === "admin" || data.user?.role === "admin") {
-        router.push("/admin");
-      } else {
-        router.push("/dashboard");
-      }
-    } catch (error) {
-      console.error("Erro ao fazer login:", error);
-      throw error;
+      if (data?.user) setUser(data.user);
     } finally {
       setLoading(false);
     }
   };
 
-  const logout = async (): Promise<void> => {
+  // ✅ logout só limpa estado
+  const logout = async () => {
     setLoading(true);
     try {
       await logoutUser();
-      setUser(null);
-      router.replace("/login");
-    } catch (error) {
-      console.error("Erro ao fazer logout:", error);
-      router.replace("/login");
     } finally {
+      Cookies.remove("access_token");
+      Cookies.remove("refresh_token");
+      setUser(null);
       setLoading(false);
     }
   };
 
-  const contextValue = useMemo(
-    () => ({ user, loading, login, logout, checkAuth }),
+  const value = useMemo(
+    () => ({ user, loading, login, logout, refreshUser }),
     [user, loading]
   );
 
   return (
-    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth deve ser usado dentro de um AuthProvider");
-  }
-  return context;
-};
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth deve ser usado dentro de AuthProvider");
+  return ctx;
+}

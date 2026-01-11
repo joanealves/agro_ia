@@ -2,22 +2,22 @@
 
 import { useEffect, useState } from 'react';
 import { Map, MapPin, Layers, Plus, Search, Filter, Download } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
 import { 
   Card, 
   CardContent, 
   CardHeader, 
   CardTitle, 
   CardDescription 
-} from '@/components/ui/card';
+} from '../../../components/ui/card';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "../../../components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,10 +26,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { api } from '@/lib/api';
-import { DataTable } from '@/components/ui/data-table';
+} from "../../../components/ui/alert-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
+import  api  from '../../../lib/api';
+import { DataTable } from '../../../components/ui/data-table';
 
 // Nota: Este é um componente fictício para demonstração
 // Em um projeto real, você usaria uma biblioteca de mapas como react-leaflet

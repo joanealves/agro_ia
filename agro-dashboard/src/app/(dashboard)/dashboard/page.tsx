@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import DashboardSidebar from "../../app/(dashboard)/Layout/dashboard-sidebar";
-import Header from "../../components/layout/Header";
-import { getDashboardData, DashboardData } from "../../lib/api";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
-import { useAuth } from "../../app/providers/AuthProvider";
+import DashboardSidebar from "../Layout/dashboard-sidebar";
+import Header from "../../../components/layout/Header";
+import { getDashboardData, DashboardData } from "../../../lib/api";
+import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
+import { useAuth } from "../../../app/providers/AuthProvider";
 
 export default function DashboardPage() {
   const { user } = useAuth();
