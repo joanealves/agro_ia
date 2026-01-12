@@ -1,23 +1,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plant, LineChart, Filter, Search, Plus, Download } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription 
-} from '@/components/ui/card';
+import { PlaneTakeoff, LineChart, Filter, Search, Plus, Download } from 'lucide-react';
+import { Button } from '../../../../components/ui/button';
+import { Input } from '../../../../components/ui/input';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription
+} from '../../../../components/ui/card';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "../../../../components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,10 +26,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { api } from '@/lib/api';
-import { AreaChartCard } from '@/components/dashboard/area-chart';
-import { DataTable } from '@/components/ui/data-table';
+} from "../../../../components/ui/alert-dialog";
+import api from '../../../../lib/api';
+import { AreaChartCard } from '../../../../components/dashboard/area-chart';
+import { DataTable } from '../../../../components/ui/data-table';
 
 interface DadosProdutividade {
   id: number;
@@ -128,12 +128,12 @@ export default function ProdutividadePage() {
           <h1 className="text-3xl font-bold">Produtividade</h1>
           <p className="text-muted-foreground">Monitoramento e análise da produtividade por cultura</p>
         </div>
-        
+
         <div className="flex gap-4 w-full md:w-auto">
           <div className="relative flex-1 md:flex-none">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Buscar cultura..." 
+            <Input
+              placeholder="Buscar cultura..."
               value={filtro}
               onChange={(e) => setFiltro(e.target.value)}
               className="pl-10 w-full md:w-[200px]"
@@ -201,7 +201,7 @@ export default function ProdutividadePage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <DataTable 
+          <DataTable
             data={filteredData}
             columns={columns}
           />
@@ -218,21 +218,21 @@ export default function ProdutividadePage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="grid gap-4 py-4">
-            <Input 
-              placeholder="Cultura" 
-              onChange={(e) => setNovoProdutividade({...novoProdutividade, cultura: e.target.value})}
+            <Input
+              placeholder="Cultura"
+              onChange={(e) => setNovoProdutividade({ ...novoProdutividade, cultura: e.target.value })}
             />
-            <Input 
-              placeholder="Área (ha)" 
-              type="number" 
+            <Input
+              placeholder="Área (ha)"
+              type="number"
               step="0.01"
-              onChange={(e) => setNovoProdutividade({...novoProdutividade, area: parseFloat(e.target.value)})}
+              onChange={(e) => setNovoProdutividade({ ...novoProdutividade, area: parseFloat(e.target.value) })}
             />
-            <Input 
-              placeholder="Produtividade (kg/ha)" 
-              type="number" 
+            <Input
+              placeholder="Produtividade (kg/ha)"
+              type="number"
               step="0.01"
-              onChange={(e) => setNovoProdutividade({...novoProdutividade, produtividade: parseFloat(e.target.value)})}
+              onChange={(e) => setNovoProdutividade({ ...novoProdutividade, produtividade: parseFloat(e.target.value) })}
             />
             {/* Aqui poderia ter um select para escolher a fazenda */}
           </div>

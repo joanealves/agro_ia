@@ -50,38 +50,38 @@ const Sidebar = () => {
       <nav className="mt-4">
         <ul>
           <li>
-            <Link href="/dashboard/clima">
-              <a className="block p-4 hover:bg-gray-700">Clima</a>
+            <Link href="/dashboard/clima" className="block p-4 hover:bg-gray-700">
+              Clima
             </Link>
           </li>
           <li>
-            <Link href="/dashboard/fazendas">
-              <a className="block p-4 hover:bg-gray-700">Fazendas</a>
+            <Link href="/dashboard/fazendas" className="block p-4 hover:bg-gray-700">
+              Fazendas
             </Link>
           </li>
           <li>
-            <Link href="/dashboard/irrigacao">
-              <a className="block p-4 hover:bg-gray-700">Irrigação</a>
+            <Link href="/dashboard/irrigacao" className="block p-4 hover:bg-gray-700">
+              Irrigação
             </Link>
           </li>
           <li>
-            <Link href="/dashboard/mapas">
-              <a className="block p-4 hover:bg-gray-700">Mapas</a>
+            <Link href="/dashboard/mapas" className="block p-4 hover:bg-gray-700">
+              Mapas
             </Link>
           </li>
           <li>
-            <Link href="/dashboard/pragas">
-              <a className="block p-4 hover:bg-gray-700">Pragas</a>
+            <Link href="/dashboard/pragas" className="block p-4 hover:bg-gray-700">
+              Pragas
             </Link>
           </li>
           <li>
-            <Link href="/dashboard/produtividade">
-              <a className="block p-4 hover:bg-gray-700">Produtividade</a>
+            <Link href="/dashboard/produtividade" className="block p-4 hover:bg-gray-700">
+              Produtividade
             </Link>
           </li>
           <li>
-            <Link href="/dashboard/admin">
-              <a className="block p-4 hover:bg-gray-700">Admin</a>
+            <Link href="/dashboard/admin" className="block p-4 hover:bg-gray-700">
+              Admin
             </Link>
           </li>
         </ul>
