@@ -1,67 +1,94 @@
-@import "leaflet/dist/leaflet.css";
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 240 5% 10%; /* Cinza escuro */
-    --foreground: 0 0% 98%; /* Branco para contraste */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
 
-    --card: 240 5% 15%; /* Fundo levemente mais claro */
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
 
-    --popover: 240 5% 15%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 220 100% 60%; /* Azul vibrante */
+    --primary: 142 76% 36%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 3.7% 15%; /* Cinza mais escuro */
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 240 3.7% 20%;
-    --muted-foreground: 240 3.8% 65%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 240 3.7% 25%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 142 76% 94%;
+    --accent-foreground: 142 76% 26%;
 
-    --border: 240 4% 20%;
-    --input: 240 4% 20%;
-    --ring: 220 100% 60%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 142 76% 36%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 142 76% 36%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 142 76% 94%;
+    --sidebar-accent-foreground: 142 76% 26%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 142 76% 36%;
   }
 
-  /* Suporte para modo escuro automático */
   .dark {
-    --background: 240 6% 8%;
-    --foreground: 0 0% 100%;
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
 
-    --card: 240 6% 12%;
-    --card-foreground: 0 0% 100%;
+    --card: 223 47% 14%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 240 6% 12%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 223 47% 14%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 220 100% 60%;
+    --primary: 142 70% 45%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 3.7% 12%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 223 47% 20%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 240 3.7% 18%;
-    --muted-foreground: 240 3.8% 65%;
+    --muted: 223 47% 20%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 240 3.7% 22%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 142 50% 20%;
+    --accent-foreground: 142 70% 70%;
 
-    --border: 240 4% 15%;
-    --input: 240 4% 15%;
-    --ring: 220 100% 60%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 223 47% 20%;
+    --input: 223 47% 20%;
+    --ring: 142 70% 45%;
+
+    --sidebar-background: 222 47% 8%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 142 70% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 142 50% 15%;
+    --sidebar-accent-foreground: 142 70% 70%;
+    --sidebar-border: 223 47% 18%;
+    --sidebar-ring: 142 70% 45%;
   }
 }
 
-/* Adicionando transições suaves para mudanças de tema */
-html {
-  @apply transition-colors duration-300;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
