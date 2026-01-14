@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { PlaneTakeoff, LineChart, Filter, Search, Plus, Download } from 'lucide-react';
+import { Search, Plus, Download, Leaf } from 'lucide-react';
+import { createClient } from "@supabase/supabase-js";
+
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import {
@@ -20,27 +22,33 @@ import {
 } from "../../../../components/ui/select";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../../../../components/ui/alert-dialog";
-import api from '../../../../lib/api';
+
 import { AreaChartCard } from '../../../../components/dashboard/area-chart';
 import { DataTable } from '../../../../components/ui/data-table';
 
+// 🔥 SUPABASE CLIENT DIRETO (SIMPLES)
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+// 🔥 TIPAGEM REAL DO SUPABASE (RELATION = ARRAY)
 interface DadosProdutividade {
   id: number;
   cultura: string;
   area: number;
   produtividade: number;
   data: string;
-  fazenda: {
+  fazenda_fazenda: {
     id: number;
     nome: string;
-  };
+  }[];
 }
 
 export default function ProdutividadePage() {
@@ -48,7 +56,6 @@ export default function ProdutividadePage() {
   const [dadosProdutividade, setDadosProdutividade] = useState<DadosProdutividade[]>([]);
   const [filtro, setFiltro] = useState('');
   const [culturaFiltro, setCulturaFiltro] = useState('todas');
-  const [periodoFiltro, setPeriodoFiltro] = useState('ultimos3meses');
   const [showDialog, setShowDialog] = useState(false);
   const [novoProdutividade, setNovoProdutividade] = useState({
     cultura: '',
@@ -57,7 +64,7 @@ export default function ProdutividadePage() {
     fazenda_id: 1
   });
 
-  // Dados para o gráfico
+  // fake (só visual)
   const dadosGrafico = [
     { date: "Jan", value: 2500, meta: 2700 },
     { date: "Fev", value: 2800, meta: 2700 },
@@ -67,35 +74,68 @@ export default function ProdutividadePage() {
     { date: "Jun", value: 3700, meta: 3400 },
   ];
 
+  // 🔥 BUSCA REAL
   useEffect(() => {
     const fetchProdutividade = async () => {
-      try {
-        const response = await api.get('/produtividade/');
-        setDadosProdutividade(response.data);
-      } catch (error) {
-        console.error('Erro ao carregar dados de produtividade:', error);
-      } finally {
-        setIsLoading(false);
+      setIsLoading(true);
+
+      const { data, error } = await supabase
+        .from("produtividade_dadosprodutividade")
+        .select(`
+          id,
+          cultura,
+          area,
+          produtividade,
+          data,
+          fazenda_fazenda (
+            id,
+            nome
+          )
+        `)
+        .order("data", { ascending: false });
+
+      if (error) {
+        console.error("Erro Supabase:", error);
+      } else {
+        setDadosProdutividade(data || []);
       }
+
+      setIsLoading(false);
     };
 
     fetchProdutividade();
   }, []);
 
+  // 🔥 INSERT REAL
   const handleCreate = async () => {
-    try {
-      const response = await api.post('/produtividade/', novoProdutividade);
-      setDadosProdutividade([...dadosProdutividade, response.data]);
-      setShowDialog(false);
-    } catch (error) {
-      console.error('Erro ao criar registro de produtividade:', error);
+    const { data, error } = await supabase
+      .from("produtividade_dadosprodutividade")
+      .insert([novoProdutividade])
+      .select(`
+        id,
+        cultura,
+        area,
+        produtividade,
+        data,
+        fazenda_fazenda (
+          id,
+          nome
+        )
+      `)
+      .single();
+
+    if (error) {
+      console.error("Erro insert:", error);
+      return;
     }
+
+    setDadosProdutividade([data, ...dadosProdutividade]);
+    setShowDialog(false);
   };
 
   const filteredData = dadosProdutividade.filter(item => {
     const matchesSearch = item.cultura.toLowerCase().includes(filtro.toLowerCase());
     const matchesCultura = culturaFiltro === 'todas' || item.cultura === culturaFiltro;
-    // Aqui você implementaria a lógica para o filtro de período
     return matchesSearch && matchesCultura;
   });
 
@@ -110,23 +150,29 @@ export default function ProdutividadePage() {
     );
   }
 
-  // Colunas para a tabela
-  const columns = [
+  // 🔥 SEM BRIGA COM DATATABLE
+  const columns: any[] = [
     { header: 'Cultura', accessor: 'cultura' },
     { header: 'Área (ha)', accessor: 'area' },
     { header: 'Produtividade (kg/ha)', accessor: 'produtividade' },
-    { header: 'Fazenda', accessor: 'fazenda.nome' },
-    { header: 'Data', accessor: 'data', cell: (value: string) => new Date(value).toLocaleDateString() }
+    { header: 'Fazenda', accessor: 'fazenda_fazenda.0.nome' },
+    {
+      header: 'Data',
+      accessor: 'data',
+      cell: (value: string) => new Date(value).toLocaleDateString()
+    }
   ];
 
-  const culturas = [...new Set(dadosProdutividade.map(item => item.cultura))];
+  const culturas = Array.from(
+    new Set(dadosProdutividade.map(item => item.cultura))
+  );
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold">Produtividade</h1>
-          <p className="text-muted-foreground">Monitoramento e análise da produtividade por cultura</p>
+          <p className="text-muted-foreground">Monitoramento agrícola</p>
         </div>
 
         <div className="flex gap-4 w-full md:w-auto">
@@ -139,110 +185,73 @@ export default function ProdutividadePage() {
               className="pl-10 w-full md:w-[200px]"
             />
           </div>
-          <Button onClick={() => setShowDialog(true)} className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
+          <Button onClick={() => setShowDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" />
             Novo Registro
           </Button>
         </div>
       </div>
 
-      {/* Gráficos de Produtividade */}
-      <div className="grid gap-4 md:grid-cols-1">
-        <AreaChartCard
-          title="Produtividade por Período"
-          data={dadosGrafico}
-          dataKey="value"
-          gradientFrom="hsl(var(--primary))"
-          gradientTo="hsl(var(--primary)/0.2)"
-        />
-      </div>
+      <AreaChartCard
+        title="Produtividade por período"
+        data={dadosGrafico}
+        dataKey="value"
+        gradientFrom="hsl(var(--primary))"
+        gradientTo="hsl(var(--primary)/0.2)"
+      />
 
-      {/* Filtros */}
       <div className="flex flex-wrap gap-4">
         <Select value={culturaFiltro} onValueChange={setCulturaFiltro}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Selecione a cultura" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="todas">Todas as culturas</SelectItem>
+            <SelectItem value="todas">Todas</SelectItem>
             {culturas.map(cultura => (
               <SelectItem key={cultura} value={cultura}>{cultura}</SelectItem>
             ))}
           </SelectContent>
         </Select>
 
-        <Select value={periodoFiltro} onValueChange={setPeriodoFiltro}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Selecione o período" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ultimos3meses">Últimos 3 meses</SelectItem>
-            <SelectItem value="ultimos6meses">Últimos 6 meses</SelectItem>
-            <SelectItem value="ultimo1ano">Último ano</SelectItem>
-            <SelectItem value="todos">Todos os registros</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <Button variant="outline" className="flex items-center gap-2">
-          <Download className="h-4 w-4" />
-          Exportar Dados
+        <Button variant="outline">
+          <Download className="h-4 w-4 mr-2" />
+          Exportar
         </Button>
       </div>
 
-      {/* Tabela de Dados */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Plant className="h-5 w-5 text-primary" />
-            Registros de Produtividade
+            <Leaf className="h-5 w-5 text-primary" />
+            Registros
           </CardTitle>
           <CardDescription>
             {filteredData.length} registros encontrados
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <DataTable
-            data={filteredData}
-            columns={columns}
-          />
+          <DataTable data={filteredData} columns={columns} />
         </CardContent>
       </Card>
 
-      {/* Modal para novo registro */}
       <AlertDialog open={showDialog} onOpenChange={setShowDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Novo Registro de Produtividade</AlertDialogTitle>
+            <AlertDialogTitle>Novo Registro</AlertDialogTitle>
             <AlertDialogDescription>
-              Preencha os dados do novo registro de produtividade
+              Adicione a produtividade da cultura
             </AlertDialogDescription>
           </AlertDialogHeader>
+
           <div className="grid gap-4 py-4">
-            <Input
-              placeholder="Cultura"
-              onChange={(e) => setNovoProdutividade({ ...novoProdutividade, cultura: e.target.value })}
-            />
-            <Input
-              placeholder="Área (ha)"
-              type="number"
-              step="0.01"
-              onChange={(e) => setNovoProdutividade({ ...novoProdutividade, area: parseFloat(e.target.value) })}
-            />
-            <Input
-              placeholder="Produtividade (kg/ha)"
-              type="number"
-              step="0.01"
-              onChange={(e) => setNovoProdutividade({ ...novoProdutividade, produtividade: parseFloat(e.target.value) })}
-            />
-            {/* Aqui poderia ter um select para escolher a fazenda */}
+            <Input placeholder="Cultura" onChange={(e) => setNovoProdutividade({ ...novoProdutividade, cultura: e.target.value })} />
+            <Input type="number" placeholder="Área (ha)" onChange={(e) => setNovoProdutividade({ ...novoProdutividade, area: Number(e.target.value) })} />
+            <Input type="number" placeholder="Produtividade (kg/ha)" onChange={(e) => setNovoProdutividade({ ...novoProdutividade, produtividade: Number(e.target.value) })} />
           </div>
+
           <AlertDialogFooter>
-            <Button variant="outline" onClick={() => setShowDialog(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleCreate}>
-              Salvar
-            </Button>
+            <Button variant="outline" onClick={() => setShowDialog(false)}>Cancelar</Button>
+            <Button onClick={handleCreate}>Salvar</Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
