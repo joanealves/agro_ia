@@ -1,30 +1,3 @@
-// export interface User {
-//   id: number;
-//   username: string;
-//   email: string;
-// }
-
-// export interface Fazenda {
-//   id: number;
-//   nome: string;
-//   latitude: number;
-//   longitude: number;
-//   localizacao: string;
-// }
-
-// export interface AuthResponse {
-//   access: string;
-//   refresh: string;
-//   user: User;
-// }
-
-
-
-
-
-
-
-
 // =============================================================================
 // TYPES - Tipos centralizados do projeto AgroIA Dashboard
 // =============================================================================
@@ -133,21 +106,49 @@ export type PragaUpdate = Partial<PragaCreate>;
 // PRODUTIVIDADE
 // =============================================================================
 
+// =============================================================================
+// PRODUTIVIDADE - Substitua esta seção no seu types.ts
+// =============================================================================
+
 export interface DadosProdutividade {
   id: number;
-  fazenda: number;
-  fazenda_nome?: string;
   cultura: string;
   area: number;
   produtividade: number;
   data: string;
+  // Fazenda como objeto completo (retornado pelo GET)
+  fazenda: {
+    id: number;
+    nome: string;
+  };
+  // Campos opcionais para compatibilidade
+  fazenda_id?: number;
+  fazenda_nome?: string;
 }
+
+export interface ProdutividadeCreate {
+  cultura: string;
+  area: number;
+  produtividade: number;
+  fazenda_id: number;
+  data: string;
+}
+
+export type ProdutividadeUpdate = Partial<ProdutividadeCreate>;
 
 export interface ProdutividadeResumo {
   fazenda__nome: string;
   media_produtividade: number;
 }
 
+export interface ProdutividadeSeriesTemporal {
+  dados: Array<{
+    data: string;
+    produtividade: number;
+    cultura: string;
+  }>;
+  total_registros: number;
+}
 // =============================================================================
 // MAPAS
 // =============================================================================

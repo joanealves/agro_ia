@@ -1,8 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Search, Plus, Download, Leaf } from 'lucide-react';
-import { createClient } from "@supabase/supabase-js";
+import { Search, Plus, Download, Leaf, Loader2, AlertCircle } from 'lucide-react';
+import { 
+  getDadosProdutividade, 
+  createDadosProdutividade,
+  getProdutividadeSeriesTemporal,
+} from '../../../../lib/api';
 
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
@@ -28,147 +32,161 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../../../../components/ui/alert-dialog";
+import { Alert, AlertDescription } from "../../../../components/ui/alert";
 
 import { AreaChartCard } from '../../../../components/dashboard/area-chart';
 import { DataTable } from '../../../../components/ui/data-table';
-
-// 🔥 SUPABASE CLIENT DIRETO (SIMPLES)
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
-// 🔥 TIPAGEM REAL DO SUPABASE (RELATION = ARRAY)
-interface DadosProdutividade {
-  id: number;
-  cultura: string;
-  area: number;
-  produtividade: number;
-  data: string;
-  fazenda_fazenda: {
-    id: number;
-    nome: string;
-  }[];
-}
+import { DadosProdutividade, ProdutividadeCreate } from '@/src/types';
 
 export default function ProdutividadePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [dadosProdutividade, setDadosProdutividade] = useState<DadosProdutividade[]>([]);
+  const [seriesTemporal, setSeriesTemporal] = useState<any[]>([]);
   const [filtro, setFiltro] = useState('');
   const [culturaFiltro, setCulturaFiltro] = useState('todas');
   const [showDialog, setShowDialog] = useState(false);
-  const [novoProdutividade, setNovoProdutividade] = useState({
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [novoProdutividade, setNovoProdutividade] = useState<ProdutividadeCreate>({
     cultura: '',
     area: 0,
     produtividade: 0,
-    fazenda_id: 1
+    fazenda_id: 1,
+    data: new Date().toISOString().split('T')[0]
   });
 
-  // fake (só visual)
-  const dadosGrafico = [
-    { date: "Jan", value: 2500, meta: 2700 },
-    { date: "Fev", value: 2800, meta: 2700 },
-    { date: "Mar", value: 3200, meta: 2900 },
-    { date: "Abr", value: 3100, meta: 3000 },
-    { date: "Mai", value: 3500, meta: 3200 },
-    { date: "Jun", value: 3700, meta: 3400 },
-  ];
-
-  // 🔥 BUSCA REAL
+  // 🔥 BUSCAR DADOS
   useEffect(() => {
-    const fetchProdutividade = async () => {
-      setIsLoading(true);
-
-      const { data, error } = await supabase
-        .from("produtividade_dadosprodutividade")
-        .select(`
-          id,
-          cultura,
-          area,
-          produtividade,
-          data,
-          fazenda_fazenda (
-            id,
-            nome
-          )
-        `)
-        .order("data", { ascending: false });
-
-      if (error) {
-        console.error("Erro Supabase:", error);
-      } else {
-        setDadosProdutividade(data || []);
-      }
-
-      setIsLoading(false);
-    };
-
-    fetchProdutividade();
+    fetchData();
   }, []);
 
-  // 🔥 INSERT REAL
-  const handleCreate = async () => {
-    const { data, error } = await supabase
-      .from("produtividade_dadosprodutividade")
-      .insert([novoProdutividade])
-      .select(`
-        id,
-        cultura,
-        area,
-        produtividade,
-        data,
-        fazenda_fazenda (
-          id,
-          nome
-        )
-      `)
-      .single();
+  const fetchData = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Buscar lista de produtividade
+      const dados = await getDadosProdutividade();
+      setDadosProdutividade(dados);
 
-    if (error) {
-      console.error("Erro insert:", error);
+      // Buscar série temporal para o gráfico
+      const serie = await getProdutividadeSeriesTemporal();
+      
+      // Transformar dados para o formato do gráfico
+      const dadosGrafico = serie.dados.slice(-6).map((item: any) => ({
+        date: new Date(item.data).toLocaleDateString('pt-BR', { month: 'short' }),
+        value: item.produtividade,
+        meta: item.produtividade * 1.1 // Meta fictícia 10% acima
+      }));
+      
+      setSeriesTemporal(dadosGrafico);
+    } catch (err: any) {
+      console.error("Erro ao buscar dados:", err);
+      setError("Erro ao carregar dados. Verifique se o backend está rodando.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 🔥 CRIAR NOVO REGISTRO
+  const handleCreate = async () => {
+    // Validação básica
+    if (!novoProdutividade.cultura || !novoProdutividade.area || !novoProdutividade.produtividade) {
+      alert('Preencha todos os campos!');
       return;
     }
 
-    setDadosProdutividade([data, ...dadosProdutividade]);
-    setShowDialog(false);
+    setIsSaving(true);
+    try {
+      const novoRegistro = await createDadosProdutividade(novoProdutividade);
+      
+      // Adicionar novo registro no topo da lista
+      setDadosProdutividade([novoRegistro, ...dadosProdutividade]);
+      
+      // Fechar dialog e limpar form
+      setShowDialog(false);
+      setNovoProdutividade({
+        cultura: '',
+        area: 0,
+        produtividade: 0,
+        fazenda_id: 1,
+        data: new Date().toISOString().split('T')[0]
+      });
+
+      // Recarregar série temporal
+      await fetchData();
+    } catch (err: any) {
+      console.error("Erro ao criar registro:", err);
+      alert(err.response?.data?.message || 'Erro ao salvar registro');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
+  // Filtros
   const filteredData = dadosProdutividade.filter(item => {
     const matchesSearch = item.cultura.toLowerCase().includes(filtro.toLowerCase());
     const matchesCultura = culturaFiltro === 'todas' || item.cultura === culturaFiltro;
     return matchesSearch && matchesCultura;
   });
 
+  // Culturas únicas para o filtro
+  const culturas = Array.from(
+    new Set(dadosProdutividade.map(item => item.cultura))
+  );
+
+  // Loading state
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 w-32 bg-muted rounded"></div>
-          <div className="h-64 w-96 bg-muted rounded"></div>
+        <div className="text-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
+          <p className="text-muted-foreground">Carregando dados...</p>
         </div>
       </div>
     );
   }
 
-  // 🔥 SEM BRIGA COM DATATABLE
-  const columns: any[] = [
+  // Colunas da tabela
+  const columns = [
     { header: 'Cultura', accessor: 'cultura' },
-    { header: 'Área (ha)', accessor: 'area' },
-    { header: 'Produtividade (kg/ha)', accessor: 'produtividade' },
-    { header: 'Fazenda', accessor: 'fazenda_fazenda.0.nome' },
+    { 
+      header: 'Área (ha)', 
+      accessor: 'area',
+      cell: (value: any) => {
+        const num = typeof value === 'number' ? value : parseFloat(value);
+        return !isNaN(num) ? num.toFixed(2) : '0.00';
+      }
+    },
+    { 
+      header: 'Produtividade (kg/ha)', 
+      accessor: 'produtividade',
+      cell: (value: any) => {
+        const num = typeof value === 'number' ? value : parseFloat(value);
+        return !isNaN(num) ? num.toFixed(0) : '0';
+      }
+    },
+    { 
+      header: 'Fazenda', 
+      accessor: 'fazenda',
+      cell: (value: any) => value?.nome || 'N/A'
+    },
     {
       header: 'Data',
       accessor: 'data',
-      cell: (value: string) => new Date(value).toLocaleDateString()
+      cell: (value: string) => {
+        try {
+          return new Date(value).toLocaleDateString('pt-BR');
+        } catch {
+          return value;
+        }
+      }
     }
   ];
 
-  const culturas = Array.from(
-    new Set(dadosProdutividade.map(item => item.cultura))
-  );
-
   return (
     <div className="p-6 space-y-6">
+      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold">Produtividade</h1>
@@ -192,66 +210,155 @@ export default function ProdutividadePage() {
         </div>
       </div>
 
-      <AreaChartCard
-        title="Produtividade por período"
-        data={dadosGrafico}
-        dataKey="value"
-        gradientFrom="hsl(var(--primary))"
-        gradientTo="hsl(var(--primary)/0.2)"
-      />
+      {/* Erro */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
+      {/* Gráfico de série temporal */}
+      {seriesTemporal.length > 0 && (
+        <AreaChartCard
+          title="Produtividade por período"
+          data={seriesTemporal}
+          dataKey="value"
+          gradientFrom="hsl(var(--primary))"
+          gradientTo="hsl(var(--primary)/0.2)"
+        />
+      )}
+
+      {/* Filtros */}
       <div className="flex flex-wrap gap-4">
         <Select value={culturaFiltro} onValueChange={setCulturaFiltro}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Selecione a cultura" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="todas">Todas</SelectItem>
+            <SelectItem value="todas">Todas as culturas</SelectItem>
             {culturas.map(cultura => (
-              <SelectItem key={cultura} value={cultura}>{cultura}</SelectItem>
+              <SelectItem key={cultura} value={cultura}>
+                {cultura}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
         <Button variant="outline">
           <Download className="h-4 w-4 mr-2" />
-          Exportar
+          Exportar CSV
         </Button>
       </div>
 
+      {/* Tabela de dados */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Leaf className="h-5 w-5 text-primary" />
-            Registros
+            Registros de Produtividade
           </CardTitle>
           <CardDescription>
-            {filteredData.length} registros encontrados
+            {filteredData.length} registro{filteredData.length !== 1 ? 's' : ''} encontrado{filteredData.length !== 1 ? 's' : ''}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <DataTable data={filteredData} columns={columns} />
+          {filteredData.length > 0 ? (
+            <DataTable data={filteredData} columns={columns} />
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <Leaf className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>Nenhum registro encontrado.</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
+      {/* Dialog para novo registro */}
       <AlertDialog open={showDialog} onOpenChange={setShowDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Novo Registro</AlertDialogTitle>
+            <AlertDialogTitle>Novo Registro de Produtividade</AlertDialogTitle>
             <AlertDialogDescription>
-              Adicione a produtividade da cultura
+              Adicione os dados de produtividade da cultura
             </AlertDialogDescription>
           </AlertDialogHeader>
 
           <div className="grid gap-4 py-4">
-            <Input placeholder="Cultura" onChange={(e) => setNovoProdutividade({ ...novoProdutividade, cultura: e.target.value })} />
-            <Input type="number" placeholder="Área (ha)" onChange={(e) => setNovoProdutividade({ ...novoProdutividade, area: Number(e.target.value) })} />
-            <Input type="number" placeholder="Produtividade (kg/ha)" onChange={(e) => setNovoProdutividade({ ...novoProdutividade, produtividade: Number(e.target.value) })} />
+            <div>
+              <label className="text-sm font-medium mb-2 block">Cultura</label>
+              <Input 
+                placeholder="Ex: Soja, Milho, Café..." 
+                value={novoProdutividade.cultura}
+                onChange={(e) => setNovoProdutividade({ 
+                  ...novoProdutividade, 
+                  cultura: e.target.value 
+                })} 
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Área (hectares)</label>
+              <Input 
+                type="number" 
+                step="0.01"
+                placeholder="Ex: 10.5" 
+                value={novoProdutividade.area || ''}
+                onChange={(e) => setNovoProdutividade({ 
+                  ...novoProdutividade, 
+                  area: parseFloat(e.target.value) || 0
+                })} 
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Produtividade (kg/ha)</label>
+              <Input 
+                type="number" 
+                step="0.01"
+                placeholder="Ex: 3500" 
+                value={novoProdutividade.produtividade || ''}
+                onChange={(e) => setNovoProdutividade({ 
+                  ...novoProdutividade, 
+                  produtividade: parseFloat(e.target.value) || 0
+                })} 
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Data</label>
+              <Input 
+                type="date"
+                value={novoProdutividade.data}
+                onChange={(e) => setNovoProdutividade({ 
+                  ...novoProdutividade, 
+                  data: e.target.value 
+                })} 
+              />
+            </div>
           </div>
 
           <AlertDialogFooter>
-            <Button variant="outline" onClick={() => setShowDialog(false)}>Cancelar</Button>
-            <Button onClick={handleCreate}>Salvar</Button>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowDialog(false)}
+              disabled={isSaving}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleCreate}
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                'Salvar'
+              )}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

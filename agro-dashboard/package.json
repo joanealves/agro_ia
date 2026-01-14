@@ -48,7 +48,6 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.0",
     "@shadcn/ui": "^0.0.4",
-    "@types/axios": "^0.9.36",
     "@types/cookie": "^0.6.0",
     "@types/geojson": "^7946.0.16",
     "@types/geojson-vt": "^3.2.5",
