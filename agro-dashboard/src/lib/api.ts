@@ -1,5 +1,5 @@
 // =============================================================================
-// API - Cliente HTTP - Versão Simplificada (Axios 1.8+ compatível)
+// API - Cliente HTTP e funções de API CORRIGIDO
 // =============================================================================
 
 import axios from "axios";
@@ -13,12 +13,36 @@ import type {
   Notificacao,
   DadosClimaticos,
   DadosProdutividade,
+  Irrigacao,
   Mapa,
   User,
 } from "../types";
 
 // =============================================================================
-// CONFIGURAÇÃO BASE
+// TIPOS AUXILIARES
+// =============================================================================
+
+// Tipo para resposta paginada do Django REST Framework
+interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
+
+// Tipo union para resposta que pode ser paginada ou array direto
+type ApiResponse<T> = T[] | PaginatedResponse<T>;
+
+// Helper para extrair dados de resposta (paginada ou direta)
+function extractData<T>(response: ApiResponse<T>): T[] {
+  if (Array.isArray(response)) {
+    return response;
+  }
+  return response.results ?? [];
+}
+
+// =============================================================================
+// AXIOS INSTANCE
 // =============================================================================
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -29,51 +53,55 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// =============================================================================
-// INTERCEPTORS
-// =============================================================================
+// Função de log de erros
+function logError(context: string, error: unknown): void {
+  if (axios.isAxiosError(error)) {
+    console.error(`[${context}] ${error.response?.status}:`, error.response?.data);
+  } else {
+    console.error(`[${context}]`, error);
+  }
+}
 
-// Adiciona token em todas as requests
-api.interceptors.request.use(
-  (config) => {
-    const token = Cookies.get("access_token");
-    if (token) {
-      config.headers = config.headers || {};
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+// Interceptor para adicionar token na request
+api.interceptors.request.use((config) => {
+  const token = Cookies.get("access_token");
 
-// Trata erros e faz refresh do token
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+
+// Interceptor para tratar erros
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Se 401 e não é retry, tenta refresh
+    // Se o erro for 401 e não for uma tentativa de refresh
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
         const refreshToken = Cookies.get("refresh_token");
         if (refreshToken) {
-          const { data } = await axios.post(`${BASE_URL}/api/auth/refresh/`, {
+          const response = await axios.post(`${BASE_URL}/api/auth/refresh/`, {
             refresh: refreshToken,
           });
 
-          const newToken = data.access || data.access_token;
-          if (newToken) {
-            Cookies.set("access_token", newToken, { expires: 1 });
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          const newAccessToken = response.data.access || response.data.access_token;
+          if (newAccessToken) {
+            Cookies.set("access_token", newAccessToken, { expires: 1 });
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
             return api(originalRequest);
           }
         }
-      } catch {
+      } catch (refreshError) {
+        // Refresh falhou, limpar cookies
         Cookies.remove("access_token");
         Cookies.remove("refresh_token");
-        if (typeof window !== "undefined") {
+        if (typeof window !== 'undefined') {
           window.location.href = "/login";
         }
       }
@@ -86,19 +114,7 @@ api.interceptors.response.use(
 export default api;
 
 // =============================================================================
-// HELPER - Log de erros
-// =============================================================================
-
-function logError(context: string, error: unknown): void {
-  if (axios.isAxiosError(error)) {
-    console.error(`[${context}] ${error.response?.status}:`, error.response?.data);
-  } else {
-    console.error(`[${context}]`, error);
-  }
-}
-
-// =============================================================================
-// DASHBOARD
+// DASHBOARD - /api/dashboard/
 // =============================================================================
 
 export async function getDashboardData(): Promise<DashboardData> {
@@ -125,8 +141,8 @@ export async function getDashboardData(): Promise<DashboardData> {
 
 export async function getFazendas(): Promise<Fazenda[]> {
   try {
-    const { data } = await api.get<Fazenda[]>("/api/fazenda/fazendas/");
-    return data;
+    const { data } = await api.get<ApiResponse<Fazenda>>("/api/fazenda/fazendas/");
+    return extractData(data);
   } catch (error) {
     logError("getFazendas", error);
     return [];
@@ -157,26 +173,26 @@ export async function deleteFazenda(id: number): Promise<void> {
   await api.delete(`/api/fazenda/fazendas/${id}/`);
 }
 
+// Alias para compatibilidade
 export const getFarms = getFazendas;
 
 // =============================================================================
-// PRAGAS - /api/pragas/list/ e /api/pragas/upload/
+// PRAGAS - /api/pragas/
 // =============================================================================
 
 export async function getPragas(): Promise<Praga[]> {
   try {
-    const { data } = await api.get("/api/pragas/list/");
-    return data.results ?? [];
+    const { data } = await api.get<ApiResponse<Praga>>("/api/pragas/list/");
+    return extractData(data);
   } catch (error) {
     logError("getPragas", error);
     return [];
   }
 }
 
-
 export async function getPraga(id: number): Promise<Praga | null> {
   try {
-    const { data } = await api.get<Praga>(`/api/pragas/list/${id}/`);
+    const { data } = await api.get<Praga>(`/api/pragas/${id}/`);
     return data;
   } catch (error) {
     logError("getPraga", error);
@@ -184,27 +200,27 @@ export async function getPraga(id: number): Promise<Praga | null> {
   }
 }
 
-export async function createPraga(praga: PragaCreate): Promise<Praga> {
+export async function createPraga(pragaData: PragaCreate): Promise<Praga> {
   const formData = new FormData();
-  formData.append("fazenda", praga.fazenda.toString());
-  formData.append("nome", praga.nome);
-  formData.append("descricao", praga.descricao);
-  if (praga.imagem) formData.append("imagem", praga.imagem);
-  if (praga.status) formData.append("status", praga.status);
+  formData.append("fazenda", pragaData.fazenda.toString());
+  formData.append("nome", pragaData.nome);
+  formData.append("descricao", pragaData.descricao);
+  if (pragaData.imagem) {
+    formData.append("imagem", pragaData.imagem);
+  }
+  if (pragaData.status) {
+    formData.append("status", pragaData.status);
+  }
 
-  const { data } = await api.post<Praga>("/api/pragas/upload/", formData, {
+  const response = await api.post<Praga>("/api/pragas/upload/", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
-  return data;
+  return response.data;
 }
 
-export async function updatePraga(id: number, praga: Partial<PragaCreate>): Promise<Praga> {
-  const { data } = await api.patch<Praga>(`/api/pragas/${id}/`, praga);
-  return data;
-}
-
-export async function updatePragaStatus(id: number, status: "pendente" | "resolvido"): Promise<void> {
-  await api.patch(`/api/pragas/${id}/atualizar_status/`, { status });
+export async function updatePraga(id: number, pragaData: Partial<PragaCreate>): Promise<Praga> {
+  const response = await api.patch<Praga>(`/api/pragas/${id}/`, pragaData);
+  return response.data;
 }
 
 export async function deletePraga(id: number): Promise<void> {
@@ -212,23 +228,23 @@ export async function deletePraga(id: number): Promise<void> {
 }
 
 // =============================================================================
-// NOTIFICAÇÕES - /api/notificacoes/notificacoes/
+// NOTIFICAÇÕES - /api/notificacoes/
 // =============================================================================
 
 export async function getNotificacoes(): Promise<Notificacao[]> {
   try {
-    const { data } = await api.get<Notificacao[]>("/api/notificacoes/notificacoes/");
-    return data;
+    const { data } = await api.get<ApiResponse<Notificacao>>("/api/notificacoes/");
+    return extractData(data);
   } catch (error) {
     logError("getNotificacoes", error);
     return [];
   }
 }
 
-export async function getNotificacoesRecentes(limit = 5): Promise<Notificacao[]> {
+export async function getNotificacoesRecentes(): Promise<Notificacao[]> {
   try {
-    const { data } = await api.get<Notificacao[]>(`/api/notificacoes/notificacoes/?limit=${limit}`);
-    return data;
+    const { data } = await api.get<ApiResponse<Notificacao>>("/api/notificacoes/recentes/");
+    return extractData(data);
   } catch (error) {
     logError("getNotificacoesRecentes", error);
     return [];
@@ -236,23 +252,24 @@ export async function getNotificacoesRecentes(limit = 5): Promise<Notificacao[]>
 }
 
 export async function marcarNotificacaoLida(id: number): Promise<void> {
-  await api.post(`/api/notificacoes/notificacoes/${id}/ler/`);
+  await api.post(`/api/notificacoes/${id}/ler/`);
 }
 
 export async function marcarTodasLidas(): Promise<void> {
-  const notificacoes = await getNotificacoes();
-  await Promise.all(notificacoes.filter((n) => !n.lida).map((n) => marcarNotificacaoLida(n.id)));
+  await api.post("/api/notificacoes/ler-todas/");
 }
 
 // =============================================================================
-// CLIMA / IRRIGAÇÃO - /api/irrigacao/
+// CLIMA - /api/irrigacao/clima/
 // =============================================================================
 
 export async function getDadosClimaticos(fazendaId?: number): Promise<DadosClimaticos[]> {
   try {
-    const url = fazendaId ? `/api/irrigacao/clima/?fazenda=${fazendaId}` : "/api/irrigacao/clima/";
-    const { data } = await api.get<DadosClimaticos[]>(url);
-    return data;
+    const url = fazendaId 
+      ? `/api/irrigacao/clima/?fazenda=${fazendaId}` 
+      : "/api/irrigacao/clima/";
+    const { data } = await api.get<ApiResponse<DadosClimaticos>>(url);
+    return extractData(data);
   } catch (error) {
     logError("getDadosClimaticos", error);
     return [];
@@ -261,7 +278,7 @@ export async function getDadosClimaticos(fazendaId?: number): Promise<DadosClima
 
 export async function getClimaAtual(fazendaId: number): Promise<DadosClimaticos | null> {
   try {
-    const { data } = await api.get<DadosClimaticos>(`/api/irrigacao/clima/?fazenda=${fazendaId}&latest=true`);
+    const { data } = await api.get<DadosClimaticos>(`/api/irrigacao/clima/atual/${fazendaId}/`);
     return data;
   } catch (error) {
     logError("getClimaAtual", error);
@@ -269,95 +286,82 @@ export async function getClimaAtual(fazendaId: number): Promise<DadosClimaticos 
   }
 }
 
-export async function getSugestaoIrrigacao(fazendaId: number): Promise<{ sugestao: string }> {
-  try {
-    const { data } = await api.get<{ sugestao: string }>(`/api/irrigacao/sugestao-irrigacao/${fazendaId}/`);
-    return data;
-  } catch (error) {
-    logError("getSugestaoIrrigacao", error);
-    return { sugestao: "Sem dados disponíveis" };
-  }
-}
-
 // =============================================================================
-// PRODUTIVIDADE - /api/produtividade/list/
+// PRODUTIVIDADE - /api/produtividade/
 // =============================================================================
 
 export async function getDadosProdutividade(fazendaId?: number): Promise<DadosProdutividade[]> {
   try {
-    const url = fazendaId ? `/api/produtividade/list/?fazenda=${fazendaId}` : "/api/produtividade/list/";
-    const { data } = await api.get<DadosProdutividade[]>(url);
-    return data;
+    const url = fazendaId 
+      ? `/api/produtividade/?fazenda=${fazendaId}` 
+      : "/api/produtividade/";
+    const { data } = await api.get<ApiResponse<DadosProdutividade>>(url);
+    return extractData(data);
   } catch (error) {
     logError("getDadosProdutividade", error);
     return [];
   }
 }
 
-export async function createDadosProdutividade(dados: {
-  fazenda: number;
-  cultura: string;
-  area: number;
-  produtividade: number;
-  data: string;
-}): Promise<DadosProdutividade> {
-  const { data } = await api.post<DadosProdutividade>("/api/produtividade/dados/", dados);
-  return data;
+// =============================================================================
+// IRRIGAÇÃO - /api/irrigacao/
+// =============================================================================
+
+export async function getIrrigacoes(fazendaId?: number): Promise<Irrigacao[]> {
+  try {
+    const url = fazendaId 
+      ? `/api/irrigacao/?fazenda=${fazendaId}` 
+      : "/api/irrigacao/";
+    const { data } = await api.get<ApiResponse<Irrigacao>>(url);
+    return extractData(data);
+  } catch (error) {
+    logError("getIrrigacoes", error);
+    return [];
+  }
 }
 
-export async function getProdutividadeSeriesTemporal(fazendaId?: number): Promise<{ dados: Array<{ data: string; produtividade: number }> }> {
+export async function getIrrigacao(id: number): Promise<Irrigacao | null> {
   try {
-    const url = fazendaId
-      ? `/api/dashboard/produtividade/${fazendaId}/serie-temporal/`
-      : "/api/produtividade/serie-temporal/";
-    const { data } = await api.get<{ dados: Array<{ data: string; produtividade: number }> }>(url);
+    const { data } = await api.get<Irrigacao>(`/api/irrigacao/${id}/`);
     return data;
   } catch (error) {
-    logError("getProdutividadeSeriesTemporal", error);
-    return { dados: [] };
+    logError("getIrrigacao", error);
+    return null;
   }
 }
 
 // =============================================================================
-// MAPAS - /api/maps/fazenda/{fazenda_id}/mapas/
+// MAPAS - /api/maps/
 // =============================================================================
 
-export async function getMapas(fazendaId: number): Promise<Mapa[]> {
+export async function getMapas(): Promise<Mapa[]> {
   try {
-    const { data } = await api.get<Mapa[]>(`/api/maps/fazenda/${fazendaId}/mapas/`);
-    return data;
+    const { data } = await api.get<ApiResponse<Mapa>>("/api/maps/");
+    return extractData(data);
   } catch (error) {
     logError("getMapas", error);
     return [];
   }
 }
 
-export const getMapasPorFazenda = getMapas;
-
-export async function createMapa(fazendaId: number, mapa: { nome: string; latitude: number; longitude: number; zoom: number }): Promise<Mapa> {
-  const { data } = await api.post<Mapa>(`/api/maps/fazenda/${fazendaId}/mapas/`, mapa);
-  return data;
-}
-
-export async function getTodosMapas(): Promise<Mapa[]> {
+export async function getMapa(id: number): Promise<Mapa | null> {
   try {
-    const fazendas = await getFazendas();
-    const mapas = await Promise.all(fazendas.map((f) => getMapas(f.id)));
-    return mapas.flat();
+    const { data } = await api.get<Mapa>(`/api/maps/${id}/`);
+    return data;
   } catch (error) {
-    logError("getTodosMapas", error);
-    return [];
+    logError("getMapa", error);
+    return null;
   }
 }
 
 // =============================================================================
-// USUÁRIOS - /api/usuarios/
+// USUÁRIOS (Admin) - /api/usuarios/
 // =============================================================================
 
 export async function getUsers(): Promise<User[]> {
   try {
-    const { data } = await api.get<User[]>("/api/usuarios/");
-    return data;
+    const { data } = await api.get<ApiResponse<User>>("/api/usuarios/");
+    return extractData(data);
   } catch (error) {
     logError("getUsers", error);
     return [];
@@ -374,13 +378,13 @@ export async function getUser(id: number): Promise<User | null> {
   }
 }
 
-export async function createUser(user: Partial<User> & { password: string }): Promise<User> {
-  const { data } = await api.post<User>("/api/usuarios/", user);
+export async function createUser(userData: Partial<User> & { password: string }): Promise<User> {
+  const { data } = await api.post<User>("/api/usuarios/", userData);
   return data;
 }
 
-export async function updateUser(id: number, user: Partial<User>): Promise<User> {
-  const { data } = await api.patch<User>(`/api/usuarios/${id}/`, user);
+export async function updateUser(id: number, userData: Partial<User>): Promise<User> {
+  const { data } = await api.patch<User>(`/api/usuarios/${id}/`, userData);
   return data;
 }
 
@@ -389,27 +393,27 @@ export async function deleteUser(id: number): Promise<void> {
 }
 
 // =============================================================================
-// IRRIGAÇÃO - Sistemas
+// CONFIGURAÇÕES - /api/configuracoes/
 // =============================================================================
 
-export interface Irrigacao {
+export interface Configuracao {
   id: number;
-  fazenda: number;
-  nome: string;
-  status: "ativo" | "inativo";
+  chave: string;
+  valor: string;
+  descricao?: string;
 }
 
-export async function getIrrigacoes(fazendaId?: number): Promise<Irrigacao[]> {
+export async function getConfiguracoes(): Promise<Configuracao[]> {
   try {
-    const url = fazendaId ? `/api/irrigacao/?fazenda=${fazendaId}` : "/api/irrigacao/";
-    const { data } = await api.get<Irrigacao[]>(url);
-    return data;
+    const { data } = await api.get<ApiResponse<Configuracao>>("/api/configuracoes/");
+    return extractData(data);
   } catch (error) {
-    logError("getIrrigacoes", error);
+    logError("getConfiguracoes", error);
     return [];
   }
 }
 
-export async function updateIrrigacaoStatus(id: number, status: "ativo" | "inativo"): Promise<void> {
-  await api.patch(`/api/irrigacao/${id}/atualizar_status/`, { status });
+export async function updateConfiguracao(id: number, config: Partial<Configuracao>): Promise<Configuracao> {
+  const { data } = await api.patch<Configuracao>(`/api/configuracoes/${id}/`, config);
+  return data;
 }
