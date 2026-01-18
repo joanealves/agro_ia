@@ -470,486 +470,1161 @@
 
 
 
-"use client";
+// "use client";
 
-// =============================================================================
-// PÁGINA DE CONFIGURAÇÕES - Preferências do usuário e sistema
-// Rota: /dashboard/admin/configuracoes
-// =============================================================================
+// // =============================================================================
+// // PÁGINA DE CONFIGURAÇÕES - AgroIA Dashboard
+// // Sprint 0 - Criar página que estava faltando (erro 404)
+// // =============================================================================
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../../../components/ui/card";
-import { Button } from "../../../../components/ui/button";
-import { Input } from "../../../../components/ui/input";
-import { Label } from "../../../../components/ui/label";
-import { Switch } from "../../../../components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs";
-import { Separator } from "../../../../components/ui/separator";
+// import { useState, useEffect } from "react";
+// import { 
+//   Settings, 
+//   Bell, 
+//   Globe, 
+//   Moon, 
+//   Sun, 
+//   Save, 
+//   RefreshCw,
+//   User,
+//   Lock,
+//   Database,
+//   Leaf
+// } from "lucide-react";
+// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../components/ui/card";
+// import { Button } from "../../../../components/ui/button";
+// import { Input } from "../../../../components/ui/input";
+// import { Label } from "../../../../components/ui/label";
+// import { Switch } from "../../../../components/ui/switch";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs";
+// import { 
+//   Select, 
+//   SelectContent, 
+//   SelectItem, 
+//   SelectTrigger, 
+//   SelectValue 
+// } from "../../../../components/ui/select";
+// import { Separator } from "../../../../components/ui/separator";
+// import { useToast } from "../../../../hooks/use-toast";
+
+// // =============================================================================
+// // TIPOS
+// // =============================================================================
+
+// interface ConfiguracoesGerais {
+//   unidadeArea: "hectares" | "alqueires" | "acres";
+//   unidadeTemperatura: "celsius" | "fahrenheit";
+//   idioma: "pt-BR" | "en-US" | "es";
+//   tema: "light" | "dark" | "system";
+// }
+
+// interface ConfiguracoesNotificacoes {
+//   emailAtivo: boolean;
+//   pushAtivo: boolean;
+//   whatsappAtivo: boolean;
+//   alertasPragas: boolean;
+//   alertasClima: boolean;
+//   alertasIrrigacao: boolean;
+//   resumoDiario: boolean;
+//   resumoSemanal: boolean;
+// }
+
+// interface ConfiguracoesCultura {
+//   culturaPadrao: string;
+//   safraAtual: string;
+//   limiteAlertaPraga: "baixo" | "medio" | "alto";
+// }
+
+// // =============================================================================
+// // COMPONENTE PRINCIPAL
+// // =============================================================================
+
+// export default function ConfiguracoesPage() {
+//   const { toast } = useToast();
+//   const [loading, setLoading] = useState(false);
+//   const [activeTab, setActiveTab] = useState("geral");
+
+//   // Estados das configurações
+//   const [configGerais, setConfigGerais] = useState<ConfiguracoesGerais>({
+//     unidadeArea: "hectares",
+//     unidadeTemperatura: "celsius",
+//     idioma: "pt-BR",
+//     tema: "dark",
+//   });
+
+//   const [configNotificacoes, setConfigNotificacoes] = useState<ConfiguracoesNotificacoes>({
+//     emailAtivo: true,
+//     pushAtivo: false,
+//     whatsappAtivo: false,
+//     alertasPragas: true,
+//     alertasClima: true,
+//     alertasIrrigacao: true,
+//     resumoDiario: false,
+//     resumoSemanal: true,
+//   });
+
+//   const [configCultura, setConfigCultura] = useState<ConfiguracoesCultura>({
+//     culturaPadrao: "soja",
+//     safraAtual: "2025/2026",
+//     limiteAlertaPraga: "medio",
+//   });
+
+//   // Carregar configurações salvas
+//   useEffect(() => {
+//     const savedConfig = localStorage.getItem("agroia_config");
+//     if (savedConfig) {
+//       try {
+//         const parsed = JSON.parse(savedConfig);
+//         if (parsed.gerais) setConfigGerais(parsed.gerais);
+//         if (parsed.notificacoes) setConfigNotificacoes(parsed.notificacoes);
+//         if (parsed.cultura) setConfigCultura(parsed.cultura);
+//       } catch (e) {
+//         console.error("Erro ao carregar configurações:", e);
+//       }
+//     }
+//   }, []);
+
+//   // Salvar configurações
+//   const handleSave = async () => {
+//     setLoading(true);
+//     try {
+//       // Salvar no localStorage (futuro: enviar para API)
+//       const config = {
+//         gerais: configGerais,
+//         notificacoes: configNotificacoes,
+//         cultura: configCultura,
+//         updatedAt: new Date().toISOString(),
+//       };
+//       localStorage.setItem("agroia_config", JSON.stringify(config));
+
+//       toast({
+//         title: "Configurações salvas",
+//         description: "Suas preferências foram atualizadas com sucesso.",
+//       });
+//     } catch (error) {
+//       toast({
+//         title: "Erro ao salvar",
+//         description: "Não foi possível salvar as configurações.",
+//         variant: "destructive",
+//       });
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   // Resetar configurações
+//   const handleReset = () => {
+//     setConfigGerais({
+//       unidadeArea: "hectares",
+//       unidadeTemperatura: "celsius",
+//       idioma: "pt-BR",
+//       tema: "dark",
+//     });
+//     setConfigNotificacoes({
+//       emailAtivo: true,
+//       pushAtivo: false,
+//       whatsappAtivo: false,
+//       alertasPragas: true,
+//       alertasClima: true,
+//       alertasIrrigacao: true,
+//       resumoDiario: false,
+//       resumoSemanal: true,
+//     });
+//     setConfigCultura({
+//       culturaPadrao: "soja",
+//       safraAtual: "2025/2026",
+//       limiteAlertaPraga: "medio",
+//     });
+//     toast({
+//       title: "Configurações resetadas",
+//       description: "Valores padrão restaurados.",
+//     });
+//   };
+
+//   return (
+//     <div className="flex-1 space-y-6 p-6">
+//       {/* Header */}
+//       <div className="flex items-center justify-between">
+//         <div>
+//           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+//             <Settings className="h-8 w-8 text-primary" />
+//             Configurações
+//           </h1>
+//           <p className="text-muted-foreground mt-1">
+//             Gerencie as preferências do sistema AgroIA
+//           </p>
+//         </div>
+//         <div className="flex gap-2">
+//           <Button variant="outline" onClick={handleReset} disabled={loading}>
+//             <RefreshCw className="mr-2 h-4 w-4" />
+//             Resetar
+//           </Button>
+//           <Button onClick={handleSave} disabled={loading}>
+//             <Save className="mr-2 h-4 w-4" />
+//             {loading ? "Salvando..." : "Salvar"}
+//           </Button>
+//         </div>
+//       </div>
+
+//       {/* Tabs */}
+//       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+//         <TabsList className="grid w-full grid-cols-4 lg:w-[600px]">
+//           <TabsTrigger value="geral" className="flex items-center gap-2">
+//             <Globe className="h-4 w-4" />
+//             <span className="hidden sm:inline">Geral</span>
+//           </TabsTrigger>
+//           <TabsTrigger value="notificacoes" className="flex items-center gap-2">
+//             <Bell className="h-4 w-4" />
+//             <span className="hidden sm:inline">Notificações</span>
+//           </TabsTrigger>
+//           <TabsTrigger value="cultura" className="flex items-center gap-2">
+//             <Leaf className="h-4 w-4" />
+//             <span className="hidden sm:inline">Cultura</span>
+//           </TabsTrigger>
+//           <TabsTrigger value="sistema" className="flex items-center gap-2">
+//             <Database className="h-4 w-4" />
+//             <span className="hidden sm:inline">Sistema</span>
+//           </TabsTrigger>
+//         </TabsList>
+
+//         {/* Tab: Configurações Gerais */}
+//         <TabsContent value="geral" className="space-y-4">
+//           <Card>
+//             <CardHeader>
+//               <CardTitle>Preferências Gerais</CardTitle>
+//               <CardDescription>
+//                 Configure unidades de medida, idioma e tema do sistema
+//               </CardDescription>
+//             </CardHeader>
+//             <CardContent className="space-y-6">
+//               {/* Unidade de Área */}
+//               <div className="grid gap-2">
+//                 <Label htmlFor="unidadeArea">Unidade de Área</Label>
+//                 <Select 
+//                   value={configGerais.unidadeArea} 
+//                   onValueChange={(v) => setConfigGerais(prev => ({ ...prev, unidadeArea: v as typeof prev.unidadeArea }))}
+//                 >
+//                   <SelectTrigger id="unidadeArea">
+//                     <SelectValue />
+//                   </SelectTrigger>
+//                   <SelectContent>
+//                     <SelectItem value="hectares">Hectares (ha)</SelectItem>
+//                     <SelectItem value="alqueires">Alqueires</SelectItem>
+//                     <SelectItem value="acres">Acres</SelectItem>
+//                   </SelectContent>
+//                 </Select>
+//                 <p className="text-sm text-muted-foreground">
+//                   Define a unidade padrão para exibição de áreas
+//                 </p>
+//               </div>
+
+//               <Separator />
+
+//               {/* Unidade de Temperatura */}
+//               <div className="grid gap-2">
+//                 <Label htmlFor="unidadeTemperatura">Unidade de Temperatura</Label>
+//                 <Select 
+//                   value={configGerais.unidadeTemperatura} 
+//                   onValueChange={(v) => setConfigGerais(prev => ({ ...prev, unidadeTemperatura: v as typeof prev.unidadeTemperatura }))}
+//                 >
+//                   <SelectTrigger id="unidadeTemperatura">
+//                     <SelectValue />
+//                   </SelectTrigger>
+//                   <SelectContent>
+//                     <SelectItem value="celsius">Celsius (°C)</SelectItem>
+//                     <SelectItem value="fahrenheit">Fahrenheit (°F)</SelectItem>
+//                   </SelectContent>
+//                 </Select>
+//               </div>
+
+//               <Separator />
+
+//               {/* Idioma */}
+//               <div className="grid gap-2">
+//                 <Label htmlFor="idioma">Idioma</Label>
+//                 <Select 
+//                   value={configGerais.idioma} 
+//                   onValueChange={(v) => setConfigGerais(prev => ({ ...prev, idioma: v as typeof prev.idioma }))}
+//                 >
+//                   <SelectTrigger id="idioma">
+//                     <SelectValue />
+//                   </SelectTrigger>
+//                   <SelectContent>
+//                     <SelectItem value="pt-BR">Português (Brasil)</SelectItem>
+//                     <SelectItem value="en-US">English (US)</SelectItem>
+//                     <SelectItem value="es">Español</SelectItem>
+//                   </SelectContent>
+//                 </Select>
+//               </div>
+
+//               <Separator />
+
+//               {/* Tema */}
+//               <div className="grid gap-2">
+//                 <Label>Tema</Label>
+//                 <div className="flex items-center gap-4">
+//                   <Button
+//                     variant={configGerais.tema === "light" ? "default" : "outline"}
+//                     size="sm"
+//                     onClick={() => setConfigGerais(prev => ({ ...prev, tema: "light" }))}
+//                   >
+//                     <Sun className="mr-2 h-4 w-4" />
+//                     Claro
+//                   </Button>
+//                   <Button
+//                     variant={configGerais.tema === "dark" ? "default" : "outline"}
+//                     size="sm"
+//                     onClick={() => setConfigGerais(prev => ({ ...prev, tema: "dark" }))}
+//                   >
+//                     <Moon className="mr-2 h-4 w-4" />
+//                     Escuro
+//                   </Button>
+//                   <Button
+//                     variant={configGerais.tema === "system" ? "default" : "outline"}
+//                     size="sm"
+//                     onClick={() => setConfigGerais(prev => ({ ...prev, tema: "system" }))}
+//                   >
+//                     Sistema
+//                   </Button>
+//                 </div>
+//               </div>
+//             </CardContent>
+//           </Card>
+//         </TabsContent>
+
+//         {/* Tab: Notificações */}
+//         <TabsContent value="notificacoes" className="space-y-4">
+//           <Card>
+//             <CardHeader>
+//               <CardTitle>Canais de Notificação</CardTitle>
+//               <CardDescription>
+//                 Escolha como deseja receber alertas e atualizações
+//               </CardDescription>
+//             </CardHeader>
+//             <CardContent className="space-y-4">
+//               <div className="flex items-center justify-between">
+//                 <div className="space-y-0.5">
+//                   <Label>E-mail</Label>
+//                   <p className="text-sm text-muted-foreground">Receber notificações por e-mail</p>
+//                 </div>
+//                 <Switch
+//                   checked={configNotificacoes.emailAtivo}
+//                   onCheckedChange={(v) => setConfigNotificacoes(prev => ({ ...prev, emailAtivo: v }))}
+//                 />
+//               </div>
+//               <Separator />
+//               <div className="flex items-center justify-between">
+//                 <div className="space-y-0.5">
+//                   <Label>Push (Navegador)</Label>
+//                   <p className="text-sm text-muted-foreground">Notificações no navegador</p>
+//                 </div>
+//                 <Switch
+//                   checked={configNotificacoes.pushAtivo}
+//                   onCheckedChange={(v) => setConfigNotificacoes(prev => ({ ...prev, pushAtivo: v }))}
+//                 />
+//               </div>
+//               <Separator />
+//               <div className="flex items-center justify-between">
+//                 <div className="space-y-0.5">
+//                   <Label>WhatsApp</Label>
+//                   <p className="text-sm text-muted-foreground">Alertas críticos via WhatsApp (futuro)</p>
+//                 </div>
+//                 <Switch
+//                   checked={configNotificacoes.whatsappAtivo}
+//                   onCheckedChange={(v) => setConfigNotificacoes(prev => ({ ...prev, whatsappAtivo: v }))}
+//                   disabled
+//                 />
+//               </div>
+//             </CardContent>
+//           </Card>
+
+//           <Card>
+//             <CardHeader>
+//               <CardTitle>Tipos de Alertas</CardTitle>
+//               <CardDescription>
+//                 Selecione quais alertas você deseja receber
+//               </CardDescription>
+//             </CardHeader>
+//             <CardContent className="space-y-4">
+//               <div className="flex items-center justify-between">
+//                 <div className="space-y-0.5">
+//                   <Label>Alertas de Pragas</Label>
+//                   <p className="text-sm text-muted-foreground">Notificar sobre novas pragas detectadas</p>
+//                 </div>
+//                 <Switch
+//                   checked={configNotificacoes.alertasPragas}
+//                   onCheckedChange={(v) => setConfigNotificacoes(prev => ({ ...prev, alertasPragas: v }))}
+//                 />
+//               </div>
+//               <Separator />
+//               <div className="flex items-center justify-between">
+//                 <div className="space-y-0.5">
+//                   <Label>Alertas Climáticos</Label>
+//                   <p className="text-sm text-muted-foreground">Avisos sobre condições climáticas adversas</p>
+//                 </div>
+//                 <Switch
+//                   checked={configNotificacoes.alertasClima}
+//                   onCheckedChange={(v) => setConfigNotificacoes(prev => ({ ...prev, alertasClima: v }))}
+//                 />
+//               </div>
+//               <Separator />
+//               <div className="flex items-center justify-between">
+//                 <div className="space-y-0.5">
+//                   <Label>Alertas de Irrigação</Label>
+//                   <p className="text-sm text-muted-foreground">Lembretes e status de irrigação</p>
+//                 </div>
+//                 <Switch
+//                   checked={configNotificacoes.alertasIrrigacao}
+//                   onCheckedChange={(v) => setConfigNotificacoes(prev => ({ ...prev, alertasIrrigacao: v }))}
+//                 />
+//               </div>
+//               <Separator />
+//               <div className="flex items-center justify-between">
+//                 <div className="space-y-0.5">
+//                   <Label>Resumo Semanal</Label>
+//                   <p className="text-sm text-muted-foreground">Receber resumo semanal por e-mail</p>
+//                 </div>
+//                 <Switch
+//                   checked={configNotificacoes.resumoSemanal}
+//                   onCheckedChange={(v) => setConfigNotificacoes(prev => ({ ...prev, resumoSemanal: v }))}
+//                 />
+//               </div>
+//             </CardContent>
+//           </Card>
+//         </TabsContent>
+
+//         {/* Tab: Cultura */}
+//         <TabsContent value="cultura" className="space-y-4">
+//           <Card>
+//             <CardHeader>
+//               <CardTitle>Configurações de Cultura</CardTitle>
+//               <CardDescription>
+//                 Defina padrões para suas culturas e safras
+//               </CardDescription>
+//             </CardHeader>
+//             <CardContent className="space-y-6">
+//               <div className="grid gap-2">
+//                 <Label htmlFor="culturaPadrao">Cultura Padrão</Label>
+//                 <Select 
+//                   value={configCultura.culturaPadrao} 
+//                   onValueChange={(v) => setConfigCultura(prev => ({ ...prev, culturaPadrao: v }))}
+//                 >
+//                   <SelectTrigger id="culturaPadrao">
+//                     <SelectValue />
+//                   </SelectTrigger>
+//                   <SelectContent>
+//                     <SelectItem value="soja">Soja</SelectItem>
+//                     <SelectItem value="milho">Milho</SelectItem>
+//                     <SelectItem value="cafe">Café</SelectItem>
+//                     <SelectItem value="cana">Cana-de-açúcar</SelectItem>
+//                     <SelectItem value="algodao">Algodão</SelectItem>
+//                     <SelectItem value="feijao">Feijão</SelectItem>
+//                     <SelectItem value="trigo">Trigo</SelectItem>
+//                   </SelectContent>
+//                 </Select>
+//                 <p className="text-sm text-muted-foreground">
+//                   Cultura selecionada por padrão ao criar novos registros
+//                 </p>
+//               </div>
+
+//               <Separator />
+
+//               <div className="grid gap-2">
+//                 <Label htmlFor="safraAtual">Safra Atual</Label>
+//                 <Select 
+//                   value={configCultura.safraAtual} 
+//                   onValueChange={(v) => setConfigCultura(prev => ({ ...prev, safraAtual: v }))}
+//                 >
+//                   <SelectTrigger id="safraAtual">
+//                     <SelectValue />
+//                   </SelectTrigger>
+//                   <SelectContent>
+//                     <SelectItem value="2024/2025">2024/2025</SelectItem>
+//                     <SelectItem value="2025/2026">2025/2026</SelectItem>
+//                     <SelectItem value="2026/2027">2026/2027</SelectItem>
+//                   </SelectContent>
+//                 </Select>
+//               </div>
+
+//               <Separator />
+
+//               <div className="grid gap-2">
+//                 <Label htmlFor="limiteAlerta">Limite de Alerta de Pragas</Label>
+//                 <Select 
+//                   value={configCultura.limiteAlertaPraga} 
+//                   onValueChange={(v) => setConfigCultura(prev => ({ ...prev, limiteAlertaPraga: v as typeof prev.limiteAlertaPraga }))}
+//                 >
+//                   <SelectTrigger id="limiteAlerta">
+//                     <SelectValue />
+//                   </SelectTrigger>
+//                   <SelectContent>
+//                     <SelectItem value="baixo">Baixo - Alertar em qualquer ocorrência</SelectItem>
+//                     <SelectItem value="medio">Médio - Alertar apenas níveis médio/alto</SelectItem>
+//                     <SelectItem value="alto">Alto - Alertar apenas níveis críticos</SelectItem>
+//                   </SelectContent>
+//                 </Select>
+//                 <p className="text-sm text-muted-foreground">
+//                   Define quando você será notificado sobre pragas
+//                 </p>
+//               </div>
+//             </CardContent>
+//           </Card>
+//         </TabsContent>
+
+//         {/* Tab: Sistema */}
+//         <TabsContent value="sistema" className="space-y-4">
+//           <Card>
+//             <CardHeader>
+//               <CardTitle>Informações do Sistema</CardTitle>
+//               <CardDescription>
+//                 Dados técnicos e versão da aplicação
+//               </CardDescription>
+//             </CardHeader>
+//             <CardContent className="space-y-4">
+//               <div className="grid grid-cols-2 gap-4">
+//                 <div>
+//                   <Label className="text-muted-foreground">Versão</Label>
+//                   <p className="font-mono">1.0.0-beta</p>
+//                 </div>
+//                 <div>
+//                   <Label className="text-muted-foreground">Build</Label>
+//                   <p className="font-mono">2026.01.15</p>
+//                 </div>
+//                 <div>
+//                   <Label className="text-muted-foreground">Frontend</Label>
+//                   <p className="font-mono">Next.js 15</p>
+//                 </div>
+//                 <div>
+//                   <Label className="text-muted-foreground">Backend</Label>
+//                   <p className="font-mono">Django 5.x</p>
+//                 </div>
+//                 <div>
+//                   <Label className="text-muted-foreground">Banco de Dados</Label>
+//                   <p className="font-mono">Supabase (PostgreSQL)</p>
+//                 </div>
+//                 <div>
+//                   <Label className="text-muted-foreground">Ambiente</Label>
+//                   <p className="font-mono">{process.env.NODE_ENV || "development"}</p>
+//                 </div>
+//               </div>
+//             </CardContent>
+//           </Card>
+
+//           <Card>
+//             <CardHeader>
+//               <CardTitle>Cache e Dados</CardTitle>
+//               <CardDescription>
+//                 Gerenciar dados armazenados localmente
+//               </CardDescription>
+//             </CardHeader>
+//             <CardContent className="space-y-4">
+//               <Button 
+//                 variant="outline" 
+//                 className="w-full"
+//                 onClick={() => {
+//                   localStorage.removeItem("agroia_config");
+//                   toast({ title: "Cache limpo", description: "Configurações locais removidas." });
+//                 }}
+//               >
+//                 <RefreshCw className="mr-2 h-4 w-4" />
+//                 Limpar Cache Local
+//               </Button>
+//               <p className="text-sm text-muted-foreground text-center">
+//                 Isso irá remover todas as configurações salvas localmente
+//               </p>
+//             </CardContent>
+//           </Card>
+//         </TabsContent>
+//       </Tabs>
+//     </div>
+//   );
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'use client';
+
+import { useState, useEffect } from 'react';
+import api from '../../../../lib/api';
 import { 
   Settings, 
   Bell, 
-  Shield, 
-  Palette,
-  Mail,
-  MessageSquare,
-  Save,
-  RefreshCw,
+  Sun, 
+  Moon, 
+  Monitor,
   Thermometer,
   Droplets,
-  CloudRain,
-  Bug
-} from "lucide-react";
-import { useTheme } from "next-themes";
+  Wind,
+  MapPin,
+  Clock,
+  Save,
+  Loader2,
+  CheckCircle,
+  AlertCircle
+} from 'lucide-react';
 
-// =============================================================================
+// ================================================================================
 // TIPOS
-// =============================================================================
+// ================================================================================
 
-interface NotificationSettings {
-  email: boolean;
-  whatsapp: boolean;
-  push: boolean;
-  emailAddress: string;
-  whatsappNumber: string;
+interface Configuracao {
+  id?: number;
+  usuario_id?: string;
+  idioma: string;
+  fuso_horario: string;
+  tema: 'light' | 'dark' | 'system';
+  unidade_area: string;
+  unidade_temperatura: string;
+  unidade_velocidade: string;
+  unidade_precipitacao: string;
+  formato_data: string;
+  notificacoes_email: boolean;
+  notificacoes_push: boolean;
+  notificacoes_whatsapp: boolean;
+  notificacoes_sms: boolean;
+  horario_inicio_notif: string;
+  horario_fim_notif: string;
+  alerta_temp_alta: number;
+  alerta_temp_baixa: number;
+  alerta_umidade_baixa: number;
+  alerta_umidade_alta: number;
+  alerta_precipitacao_alta: number;
+  alerta_vento_forte: number;
+  alerta_geada: boolean;
+  dashboard_widgets: string[];
+  fazenda_padrao_id: number | null;
 }
 
-interface AlertSettings {
-  tempMin: number;
-  tempMax: number;
-  umidadeMin: number;
-  umidadeMax: number;
-  precipitacaoMax: number;
-  pragaAlerta: boolean;
+interface Fazenda {
+  id: number;
+  nome: string;
 }
 
-// =============================================================================
+// ================================================================================
 // COMPONENTE PRINCIPAL
-// =============================================================================
+// ================================================================================
 
 export default function ConfiguracoesPage() {
-  const { theme, setTheme } = useTheme();
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [fazendas, setFazendas] = useState<Fazenda[]>([]);
   
-  // Estados de notificação
-  const [notifications, setNotifications] = useState<NotificationSettings>({
-    email: true,
-    whatsapp: false,
-    push: true,
-    emailAddress: "",
-    whatsappNumber: "",
+  const [config, setConfig] = useState<Configuracao>({
+    idioma: 'pt-BR',
+    fuso_horario: 'America/Sao_Paulo',
+    tema: 'system',
+    unidade_area: 'hectare',
+    unidade_temperatura: 'celsius',
+    unidade_velocidade: 'km/h',
+    unidade_precipitacao: 'mm',
+    formato_data: 'DD/MM/YYYY',
+    notificacoes_email: true,
+    notificacoes_push: true,
+    notificacoes_whatsapp: false,
+    notificacoes_sms: false,
+    horario_inicio_notif: '06:00',
+    horario_fim_notif: '22:00',
+    alerta_temp_alta: 35,
+    alerta_temp_baixa: 10,
+    alerta_umidade_baixa: 30,
+    alerta_umidade_alta: 90,
+    alerta_precipitacao_alta: 50,
+    alerta_vento_forte: 60,
+    alerta_geada: true,
+    dashboard_widgets: ['clima', 'pragas', 'irrigacao', 'produtividade'],
+    fazenda_padrao_id: null,
   });
 
-  // Estados de alertas
-  const [alerts, setAlerts] = useState<AlertSettings>({
-    tempMin: 10,
-    tempMax: 35,
-    umidadeMin: 30,
-    umidadeMax: 80,
-    precipitacaoMax: 50,
-    pragaAlerta: true,
-  });
+  // Carregar configurações
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Carregar configurações
+        const configRes = await api.get('/api/configuracoes/');
+        if (configRes.data) {
+          setConfig(configRes.data);
+        }
+        
+        // Carregar fazendas para o select
+        const fazendasRes = await api.get('/api/fazendas/');
+        setFazendas(fazendasRes.data || []);
+        
+      } catch (err) {
+        console.error('Erro ao carregar configurações:', err);
+        setError('Erro ao carregar configurações');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
 
   // Salvar configurações
   const handleSave = async () => {
-    setSaving(true);
-    
-    // Simular salvamento (integrar com API depois)
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Salvar em localStorage por enquanto
-    localStorage.setItem("agroia_notifications", JSON.stringify(notifications));
-    localStorage.setItem("agroia_alerts", JSON.stringify(alerts));
-    
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      setSaving(true);
+      setError(null);
+      
+      await api.patch('/api/configuracoes/atualizar/', config);
+      
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+      
+    } catch (err) {
+      console.error('Erro ao salvar:', err);
+      setError('Erro ao salvar configurações');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  // =============================================================================
-  // RENDER
-  // =============================================================================
+  // Atualizar campo
+  const updateConfig = (field: keyof Configuracao, value: any) => {
+    setConfig(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Aplicar tema
+  useEffect(() => {
+    if (config.tema === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else if (config.tema === 'light') {
+      document.documentElement.classList.remove('dark');
+    } else {
+      // System
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }, [config.tema]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 max-w-4xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Settings className="h-8 w-8" />
-            Configurações
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Gerencie suas preferências e configurações do sistema
-          </p>
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <Settings className="w-8 h-8 text-green-600" />
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              Configurações
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400">
+              Personalize sua experiência no AgroIA
+            </p>
+          </div>
         </div>
         
-        <Button onClick={handleSave} disabled={saving}>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+        >
           {saving ? (
-            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : saved ? (
+            <CheckCircle className="w-4 h-4" />
           ) : (
-            <Save className="h-4 w-4 mr-2" />
+            <Save className="w-4 h-4" />
           )}
-          {saved ? "Salvo!" : "Salvar Alterações"}
-        </Button>
+          {saving ? 'Salvando...' : saved ? 'Salvo!' : 'Salvar'}
+        </button>
       </div>
 
-      {/* Tabs de Configurações */}
-      <Tabs defaultValue="notifications" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 lg:w-[500px]">
-          <TabsTrigger value="notifications">
-            <Bell className="h-4 w-4 mr-2" />
-            Notificações
-          </TabsTrigger>
-          <TabsTrigger value="alerts">
-            <Thermometer className="h-4 w-4 mr-2" />
-            Alertas
-          </TabsTrigger>
-          <TabsTrigger value="appearance">
-            <Palette className="h-4 w-4 mr-2" />
+      {/* Mensagens */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2 text-red-700 dark:text-red-400">
+          <AlertCircle className="w-5 h-5" />
+          {error}
+        </div>
+      )}
+
+      <div className="space-y-6">
+        {/* Aparência */}
+        <section className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <Monitor className="w-5 h-5" />
             Aparência
-          </TabsTrigger>
-          <TabsTrigger value="security">
-            <Shield className="h-4 w-4 mr-2" />
-            Segurança
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Tab: Notificações */}
-        <TabsContent value="notifications">
-          <Card>
-            <CardHeader>
-              <CardTitle>Canais de Notificação</CardTitle>
-              <CardDescription>
-                Configure como deseja receber alertas e notificações
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Email */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-blue-500/10">
-                    <Mail className="h-5 w-5 text-blue-500" />
-                  </div>
-                  <div>
-                    <Label htmlFor="email-toggle">Notificações por Email</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Receba alertas diretamente no seu email
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  id="email-toggle"
-                  checked={notifications.email}
-                  onCheckedChange={(checked) => 
-                    setNotifications(prev => ({ ...prev, email: checked }))
-                  }
-                />
-              </div>
-
-              {notifications.email && (
-                <div className="ml-12 space-y-2">
-                  <Label htmlFor="email-address">Endereço de Email</Label>
-                  <Input
-                    id="email-address"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={notifications.emailAddress}
-                    onChange={(e) => 
-                      setNotifications(prev => ({ ...prev, emailAddress: e.target.value }))
-                    }
-                  />
-                </div>
-              )}
-
-              <Separator />
-
-              {/* WhatsApp */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-green-500/10">
-                    <MessageSquare className="h-5 w-5 text-green-500" />
-                  </div>
-                  <div>
-                    <Label htmlFor="whatsapp-toggle">Notificações por WhatsApp</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Receba alertas via WhatsApp
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  id="whatsapp-toggle"
-                  checked={notifications.whatsapp}
-                  onCheckedChange={(checked) => 
-                    setNotifications(prev => ({ ...prev, whatsapp: checked }))
-                  }
-                />
-              </div>
-
-              {notifications.whatsapp && (
-                <div className="ml-12 space-y-2">
-                  <Label htmlFor="whatsapp-number">Número do WhatsApp</Label>
-                  <Input
-                    id="whatsapp-number"
-                    type="tel"
-                    placeholder="+55 (11) 99999-9999"
-                    value={notifications.whatsappNumber}
-                    onChange={(e) => 
-                      setNotifications(prev => ({ ...prev, whatsappNumber: e.target.value }))
-                    }
-                  />
-                </div>
-              )}
-
-              <Separator />
-
-              {/* Push */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-purple-500/10">
-                    <Bell className="h-5 w-5 text-purple-500" />
-                  </div>
-                  <div>
-                    <Label htmlFor="push-toggle">Notificações Push</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Receba alertas no navegador/app
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  id="push-toggle"
-                  checked={notifications.push}
-                  onCheckedChange={(checked) => 
-                    setNotifications(prev => ({ ...prev, push: checked }))
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Tab: Alertas */}
-        <TabsContent value="alerts">
-          <Card>
-            <CardHeader>
-              <CardTitle>Limites de Alerta</CardTitle>
-              <CardDescription>
-                Configure os limites para disparo de alertas automáticos
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Temperatura */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Thermometer className="h-5 w-5 text-red-500" />
-                  <Label className="text-base font-medium">Temperatura (°C)</Label>
-                </div>
-                <div className="grid grid-cols-2 gap-4 ml-7">
-                  <div className="space-y-2">
-                    <Label htmlFor="temp-min">Mínimo</Label>
-                    <Input
-                      id="temp-min"
-                      type="number"
-                      value={alerts.tempMin}
-                      onChange={(e) => 
-                        setAlerts(prev => ({ ...prev, tempMin: Number(e.target.value) }))
-                      }
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Alerta quando temperatura abaixo de {alerts.tempMin}°C
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="temp-max">Máximo</Label>
-                    <Input
-                      id="temp-max"
-                      type="number"
-                      value={alerts.tempMax}
-                      onChange={(e) => 
-                        setAlerts(prev => ({ ...prev, tempMax: Number(e.target.value) }))
-                      }
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Alerta quando temperatura acima de {alerts.tempMax}°C
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Umidade */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Droplets className="h-5 w-5 text-blue-500" />
-                  <Label className="text-base font-medium">Umidade (%)</Label>
-                </div>
-                <div className="grid grid-cols-2 gap-4 ml-7">
-                  <div className="space-y-2">
-                    <Label htmlFor="umidade-min">Mínimo</Label>
-                    <Input
-                      id="umidade-min"
-                      type="number"
-                      value={alerts.umidadeMin}
-                      onChange={(e) => 
-                        setAlerts(prev => ({ ...prev, umidadeMin: Number(e.target.value) }))
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="umidade-max">Máximo</Label>
-                    <Input
-                      id="umidade-max"
-                      type="number"
-                      value={alerts.umidadeMax}
-                      onChange={(e) => 
-                        setAlerts(prev => ({ ...prev, umidadeMax: Number(e.target.value) }))
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Precipitação */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <CloudRain className="h-5 w-5 text-cyan-500" />
-                  <Label className="text-base font-medium">Precipitação (mm)</Label>
-                </div>
-                <div className="ml-7 space-y-2">
-                  <Label htmlFor="precipitacao-max">Máximo diário</Label>
-                  <Input
-                    id="precipitacao-max"
-                    type="number"
-                    className="w-[200px]"
-                    value={alerts.precipitacaoMax}
-                    onChange={(e) => 
-                      setAlerts(prev => ({ ...prev, precipitacaoMax: Number(e.target.value) }))
-                    }
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Alerta quando precipitação diária acima de {alerts.precipitacaoMax}mm
-                  </p>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Pragas */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-red-500/10">
-                    <Bug className="h-5 w-5 text-red-500" />
-                  </div>
-                  <div>
-                    <Label htmlFor="praga-toggle">Alertas de Pragas</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Receber alertas quando pragas nível alto/crítico
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  id="praga-toggle"
-                  checked={alerts.pragaAlerta}
-                  onCheckedChange={(checked) => 
-                    setAlerts(prev => ({ ...prev, pragaAlerta: checked }))
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Tab: Aparência */}
-        <TabsContent value="appearance">
-          <Card>
-            <CardHeader>
-              <CardTitle>Tema e Aparência</CardTitle>
-              <CardDescription>
-                Personalize a aparência do sistema
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <Label className="text-base font-medium">Tema</Label>
-                <div className="grid grid-cols-3 gap-4">
-                  <Button
-                    variant={theme === "light" ? "default" : "outline"}
-                    className="h-auto py-4 flex flex-col gap-2"
-                    onClick={() => setTheme("light")}
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Tema */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Tema
+              </label>
+              <div className="flex gap-2">
+                {[
+                  { value: 'light', label: 'Claro', icon: Sun },
+                  { value: 'dark', label: 'Escuro', icon: Moon },
+                  { value: 'system', label: 'Sistema', icon: Monitor },
+                ].map(({ value, label, icon: Icon }) => (
+                  <button
+                    key={value}
+                    onClick={() => updateConfig('tema', value)}
+                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border transition-colors ${
+                      config.tema === value
+                        ? 'bg-green-50 dark:bg-green-900/30 border-green-500 text-green-700 dark:text-green-400'
+                        : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }`}
                   >
-                    <div className="w-full h-20 rounded bg-white border shadow-sm" />
-                    <span>Claro</span>
-                  </Button>
-                  <Button
-                    variant={theme === "dark" ? "default" : "outline"}
-                    className="h-auto py-4 flex flex-col gap-2"
-                    onClick={() => setTheme("dark")}
-                  >
-                    <div className="w-full h-20 rounded bg-gray-900 border border-gray-700" />
-                    <span>Escuro</span>
-                  </Button>
-                  <Button
-                    variant={theme === "system" ? "default" : "outline"}
-                    className="h-auto py-4 flex flex-col gap-2"
-                    onClick={() => setTheme("system")}
-                  >
-                    <div className="w-full h-20 rounded bg-gradient-to-r from-white to-gray-900 border" />
-                    <span>Sistema</span>
-                  </Button>
-                </div>
+                    <Icon className="w-4 h-4" />
+                    {label}
+                  </button>
+                ))}
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+            </div>
 
-        {/* Tab: Segurança */}
-        <TabsContent value="security">
-          <Card>
-            <CardHeader>
-              <CardTitle>Segurança da Conta</CardTitle>
-              <CardDescription>
-                Gerencie a segurança da sua conta
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <Label htmlFor="current-password">Senha Atual</Label>
-                <Input
-                  id="current-password"
-                  type="password"
-                  placeholder="••••••••"
+            {/* Idioma */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Idioma
+              </label>
+              <select
+                value={config.idioma}
+                onChange={(e) => updateConfig('idioma', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="pt-BR">Português (Brasil)</option>
+                <option value="en-US">English (US)</option>
+                <option value="es">Español</option>
+              </select>
+            </div>
+
+            {/* Fuso Horário */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Fuso Horário
+              </label>
+              <select
+                value={config.fuso_horario}
+                onChange={(e) => updateConfig('fuso_horario', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="America/Sao_Paulo">Brasília (GMT-3)</option>
+                <option value="America/Manaus">Manaus (GMT-4)</option>
+                <option value="America/Cuiaba">Cuiabá (GMT-4)</option>
+                <option value="America/Rio_Branco">Rio Branco (GMT-5)</option>
+              </select>
+            </div>
+
+            {/* Formato de Data */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Formato de Data
+              </label>
+              <select
+                value={config.formato_data}
+                onChange={(e) => updateConfig('formato_data', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        {/* Unidades de Medida */}
+        <section className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <MapPin className="w-5 h-5" />
+            Unidades de Medida
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Área
+              </label>
+              <select
+                value={config.unidade_area}
+                onChange={(e) => updateConfig('unidade_area', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="hectare">Hectare (ha)</option>
+                <option value="alqueire_paulista">Alqueire Paulista</option>
+                <option value="alqueire_mineiro">Alqueire Mineiro</option>
+                <option value="acre">Acre</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Temperatura
+              </label>
+              <select
+                value={config.unidade_temperatura}
+                onChange={(e) => updateConfig('unidade_temperatura', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="celsius">Celsius (°C)</option>
+                <option value="fahrenheit">Fahrenheit (°F)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Velocidade do Vento
+              </label>
+              <select
+                value={config.unidade_velocidade}
+                onChange={(e) => updateConfig('unidade_velocidade', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="km/h">km/h</option>
+                <option value="m/s">m/s</option>
+                <option value="mph">mph</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Precipitação
+              </label>
+              <select
+                value={config.unidade_precipitacao}
+                onChange={(e) => updateConfig('unidade_precipitacao', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="mm">Milímetros (mm)</option>
+                <option value="in">Polegadas (in)</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        {/* Notificações */}
+        <section className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <Bell className="w-5 h-5" />
+            Notificações
+          </h2>
+          
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { field: 'notificacoes_email', label: 'E-mail' },
+                { field: 'notificacoes_push', label: 'Push (navegador)' },
+                { field: 'notificacoes_whatsapp', label: 'WhatsApp' },
+                { field: 'notificacoes_sms', label: 'SMS' },
+              ].map(({ field, label }) => (
+                <label
+                  key={field}
+                  className="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={config[field as keyof Configuracao] as boolean}
+                    onChange={(e) => updateConfig(field as keyof Configuracao, e.target.checked)}
+                    className="w-4 h-4 text-green-600 rounded border-gray-300 focus:ring-green-500"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
+                </label>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  Horário de Início das Notificações
+                </label>
+                <input
+                  type="time"
+                  value={config.horario_inicio_notif}
+                  onChange={(e) => updateConfig('horario_inicio_notif', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-4">
-                  <Label htmlFor="new-password">Nova Senha</Label>
-                  <Input
-                    id="new-password"
-                    type="password"
-                    placeholder="••••••••"
-                  />
-                </div>
-                <div className="space-y-4">
-                  <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
-                  <Input
-                    id="confirm-password"
-                    type="password"
-                    placeholder="••••••••"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  Horário de Fim das Notificações
+                </label>
+                <input
+                  type="time"
+                  value={config.horario_fim_notif}
+                  onChange={(e) => updateConfig('horario_fim_notif', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
               </div>
+            </div>
+          </div>
+        </section>
 
-              <Button variant="outline">
-                Alterar Senha
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        {/* Alertas Climáticos */}
+        <section className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <Thermometer className="w-5 h-5" />
+            Alertas Climáticos
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <Thermometer className="w-4 h-4 text-red-500" />
+                Temp. Alta (°C)
+              </label>
+              <input
+                type="number"
+                value={config.alerta_temp_alta}
+                onChange={(e) => updateConfig('alerta_temp_alta', parseFloat(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <Thermometer className="w-4 h-4 text-blue-500" />
+                Temp. Baixa (°C)
+              </label>
+              <input
+                type="number"
+                value={config.alerta_temp_baixa}
+                onChange={(e) => updateConfig('alerta_temp_baixa', parseFloat(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <Droplets className="w-4 h-4 text-yellow-500" />
+                Umidade Baixa (%)
+              </label>
+              <input
+                type="number"
+                value={config.alerta_umidade_baixa}
+                onChange={(e) => updateConfig('alerta_umidade_baixa', parseFloat(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <Droplets className="w-4 h-4 text-blue-500" />
+                Umidade Alta (%)
+              </label>
+              <input
+                type="number"
+                value={config.alerta_umidade_alta}
+                onChange={(e) => updateConfig('alerta_umidade_alta', parseFloat(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <Droplets className="w-4 h-4 text-blue-600" />
+                Precipitação Alta (mm)
+              </label>
+              <input
+                type="number"
+                value={config.alerta_precipitacao_alta}
+                onChange={(e) => updateConfig('alerta_precipitacao_alta', parseFloat(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <Wind className="w-4 h-4 text-gray-500" />
+                Vento Forte (km/h)
+              </label>
+              <input
+                type="number"
+                value={config.alerta_vento_forte}
+                onChange={(e) => updateConfig('alerta_vento_forte', parseFloat(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <label className="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors w-fit">
+              <input
+                type="checkbox"
+                checked={config.alerta_geada}
+                onChange={(e) => updateConfig('alerta_geada', e.target.checked)}
+                className="w-4 h-4 text-green-600 rounded border-gray-300 focus:ring-green-500"
+              />
+              <span className="text-sm text-gray-700 dark:text-gray-300">
+                Alertar sobre risco de geada
+              </span>
+            </label>
+          </div>
+        </section>
+
+        {/* Fazenda Padrão */}
+        <section className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <MapPin className="w-5 h-5" />
+            Dashboard
+          </h2>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Fazenda Padrão (exibida ao abrir o dashboard)
+            </label>
+            <select
+              value={config.fazenda_padrao_id || ''}
+              onChange={(e) => updateConfig('fazenda_padrao_id', e.target.value ? parseInt(e.target.value) : null)}
+              className="w-full max-w-md px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            >
+              <option value="">Todas as fazendas</option>
+              {fazendas.map(fazenda => (
+                <option key={fazenda.id} value={fazenda.id}>
+                  {fazenda.nome}
+                </option>
+              ))}
+            </select>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
