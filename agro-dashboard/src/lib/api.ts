@@ -804,27 +804,39 @@ export async function getProdutividadeResumo(): Promise<{ fazenda__nome: string;
 // MAPAS - /api/maps/
 // =============================================================================
 
-export async function getMapas(fazendaId?: number): Promise<Mapa[]> {
+// MAPAS CRUD
+export async function getMapas(fazendaId: number): Promise<Mapa[]> {
   try {
-    const url = fazendaId 
-      ? `/api/maps/?fazenda=${fazendaId}` 
-      : "/api/maps/";
-    const response: AxiosResponse = await api.get(url);
-    return extractData<Mapa>(response.data);
+    const response: AxiosResponse = await api.get(`/api/maps/fazenda/${fazendaId}/mapas/`);
+    return response.data;
   } catch (error) {
     logError("getMapas", error);
     return [];
   }
 }
 
-export async function getMapa(id: number): Promise<Mapa | null> {
+export async function getMapa(fazendaId: number, mapaId: number): Promise<Mapa | null> {
   try {
-    const { data } = await api.get<Mapa>(`/api/maps/${id}/`);
+    const { data } = await api.get<Mapa>(`/api/maps/fazenda/${fazendaId}/mapas/${mapaId}/`);
     return data;
   } catch (error) {
     logError("getMapa", error);
     return null;
   }
+}
+
+export async function createMapa(fazendaId: number, mapa: Partial<Mapa>): Promise<Mapa> {
+  const { data } = await api.post<Mapa>(`/api/maps/fazenda/${fazendaId}/mapas/`, mapa);
+  return data;
+}
+
+export async function updateMapa(fazendaId: number, mapaId: number, mapa: Partial<Mapa>): Promise<Mapa> {
+  const { data } = await api.put<Mapa>(`/api/maps/fazenda/${fazendaId}/mapas/${mapaId}/`, mapa);
+  return data;
+}
+
+export async function deleteMapa(fazendaId: number, mapaId: number): Promise<void> {
+  await api.delete(`/api/maps/fazenda/${fazendaId}/mapas/${mapaId}/`);
 }
 
 // =============================================================================

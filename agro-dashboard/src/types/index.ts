@@ -426,7 +426,9 @@ export interface Mapa {
   latitude: number;
   longitude: number;
   zoom: number;
+  camadas?: any; // GeoJSON ou estrutura de camadas
   data_criacao?: string;
+  data_atualizacao?: string;
 }
 
 // =============================================================================

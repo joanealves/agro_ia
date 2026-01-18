@@ -1,7 +1,7 @@
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useState } from "react";
-import { getFarms } from "@/lib/api";
+import { getFarms } from "../../lib/api";
 import L from "leaflet";
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
@@ -38,7 +38,7 @@ export default function FarmMap() {
     async function fetchFarms() {
       try {
         const data = await getFarms();
-        setFarms(data);
+        setFarms(data.map((farm: any) => ({ ...farm, id: farm.id.toString() })));
       } catch (error) {
         console.error("Erro ao carregar fazendas:", error);
       }

@@ -7,7 +7,9 @@ class Mapa(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
     zoom = models.IntegerField(default=10)
+    camadas = models.JSONField(default=dict, blank=True)  # GeoJSON ou estrutura de camadas
     data_criacao = models.DateTimeField(auto_now_add=True)
+    data_atualizacao = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.nome} - {self.fazenda.nome}"
