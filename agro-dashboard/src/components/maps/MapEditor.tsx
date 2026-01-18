@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, FeatureGroup, GeoJSON } from "react-leaflet";
 // @ts-ignore
 import { EditControl } from "react-leaflet-draw/dist/esm/index.js";
@@ -28,6 +28,28 @@ interface Props {
 }
 
 export default function MapEditor({ fazendaId }: Props) {
+    const leafletMapRef = useRef<L.Map | null>(null);
+    // Salvar camadas editadas
+    function onEdited(e: L.LeafletEvent) {
+        if (e.layer) {
+            e.layer.eachLayer((layer: any) => {
+                const geojson = layer.toGeoJSON();
+                const featureCollection = {
+                    type: "FeatureCollection",
+                    features: [geojson]
+                };
+                if (selectedMapa) {
+                    updateMapa(fazendaId, selectedMapa.id, { camadas: featureCollection }).then(fetchMapas);
+                }
+            });
+        }
+    }
+    // Função para centralizar o mapa na fazenda
+    const handleLocateFazenda = () => {
+        if (selectedMapa && leafletMapRef.current) {
+            leafletMapRef.current.setView([selectedMapa.latitude, selectedMapa.longitude], selectedMapa.zoom || 15);
+        }
+    };
     // Fallback amigável para evitar erro de contexto
     if (!fazendaId || typeof fazendaId !== 'number' || isNaN(fazendaId) || fazendaId <= 0) {
         return (
@@ -86,17 +108,33 @@ export default function MapEditor({ fazendaId }: Props) {
     }
 
     function onDeleted(e: L.LeafletEvent) {
-        mapas.forEach((mapa) => {
-            deleteMapa(fazendaId, mapa.id);
+        mapas.forEach(async (mapa) => {
+            try {
+                await deleteMapa(fazendaId, mapa.id);
+            } catch (err: any) {
+                if (err?.response?.status !== 404) {
+                    alert('Erro ao deletar mapa: ' + (err?.message || 'Erro desconhecido'));
+                }
+            }
         });
         fetchMapas();
+    }
+
+    // Limpar todos os desenhos do mapa
+    function handleClearMap() {
+        if (window.confirm('Deseja realmente remover todos os desenhos do mapa?')) {
+            mapas.forEach((mapa) => {
+                deleteMapa(fazendaId, mapa.id);
+            });
+            fetchMapas();
+        }
     }
 
     return (
         <div>
             <h2>Editor de Mapas</h2>
             {loading && <p>Carregando mapas...</p>}
-            <div style={{ marginBottom: 12 }}>
+            <div style={{ marginBottom: 12, display: 'flex', gap: 8 }}>
                 {mapas.length > 0 && (
                     <select
                         value={selectedMapa?.id || ''}
@@ -110,14 +148,36 @@ export default function MapEditor({ fazendaId }: Props) {
                         ))}
                     </select>
                 )}
+                <button
+                    type="button"
+                    className="px-3 py-1 bg-red-500 text-white rounded"
+                    onClick={handleClearMap}
+                    disabled={mapas.length === 0}
+                >
+                    Limpar desenhos
+                </button>
+                <button
+                    type="button"
+                    className="px-3 py-1 bg-blue-500 text-white rounded"
+                    onClick={handleLocateFazenda}
+                    disabled={!selectedMapa}
+                >
+                    Centralizar fazenda
+                </button>
             </div>
-            <MapContainer center={selectedMapa ? [selectedMapa.latitude, selectedMapa.longitude] : initialCenter} zoom={selectedMapa ? selectedMapa.zoom : 5} style={{ height: "500px", width: "100%" }}>
+            <MapContainer
+                ref={leafletMapRef}
+                center={selectedMapa ? [selectedMapa.latitude, selectedMapa.longitude] : initialCenter}
+                zoom={selectedMapa ? selectedMapa.zoom : 5}
+                style={{ height: "500px", width: "100%" }}
+            >
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 <FeatureGroup>
                     <EditControl
                         position="topright"
                         onCreated={onCreated}
                         onDeleted={onDeleted}
+                        onEdited={onEdited}
                         draw={{
                             rectangle: true,
                             polygon: true,
@@ -126,12 +186,32 @@ export default function MapEditor({ fazendaId }: Props) {
                             circle: false,
                             circlemarker: false,
                         }}
+                        edit={{
+                            edit: true,
+                            remove: true
+                        }}
                     />
                     {selectedMapa && selectedMapa.camadas &&
                         typeof selectedMapa.camadas === 'object' &&
                         selectedMapa.camadas.type === 'FeatureCollection' &&
                         Array.isArray(selectedMapa.camadas.features) ? (
-                        <GeoJSON key={selectedMapa.id} data={selectedMapa.camadas} />
+                        <GeoJSON
+                            key={selectedMapa.id}
+                            data={selectedMapa.camadas}
+                            onEachFeature={(feature, layer) => {
+                                let info = '';
+                                if (feature.geometry) {
+                                    info += `Tipo: ${feature.geometry.type}`;
+                                    if (feature.geometry.type === 'Polygon') {
+                                        info += ` | Pontos: ${feature.geometry.coordinates[0]?.length}`;
+                                    }
+                                    if (feature.geometry.type === 'Point') {
+                                        info += ` | Coordenadas: ${feature.geometry.coordinates.join(', ')}`;
+                                    }
+                                }
+                                layer.bindPopup(info || 'Forma desenhada');
+                            }}
+                        />
                     ) : selectedMapa ? (
                         <Marker key={selectedMapa.id} position={[selectedMapa.latitude, selectedMapa.longitude]}>
                             <Popup>{selectedMapa.nome}</Popup>
@@ -139,6 +219,24 @@ export default function MapEditor({ fazendaId }: Props) {
                     ) : null}
                 </FeatureGroup>
             </MapContainer>
+            {/* Lista de camadas desenhadas */}
+            {selectedMapa && selectedMapa.camadas &&
+                typeof selectedMapa.camadas === 'object' &&
+                selectedMapa.camadas.type === 'FeatureCollection' &&
+                Array.isArray(selectedMapa.camadas.features) && (
+                    <div className="mt-4 p-2 border rounded bg-gray-50">
+                        <h3 className="font-bold mb-2">Camadas desenhadas:</h3>
+                        <ul>
+                            {selectedMapa.camadas.features.map((feature: any, idx: number) => (
+                                <li key={idx}>
+                                    Tipo: {feature.geometry?.type}
+                                    {feature.geometry?.type === 'Polygon' && ` | Pontos: ${feature.geometry.coordinates[0]?.length}`}
+                                    {feature.geometry?.type === 'Point' && ` | Coordenadas: ${feature.geometry.coordinates.join(', ')}`}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
         </div>
     );
 }
