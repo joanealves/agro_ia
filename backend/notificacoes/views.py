@@ -29,8 +29,8 @@ class NotificacaoViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Retorna notificações do usuário logado"""
         return Notificacao.objects.filter(
-            usuario_id=self.request.user.id
-        ).order_by('-created_at')
+            usuario=self.request.user
+        ).order_by('-data_criacao')
     
     @action(detail=False, methods=['get'])
     def recentes(self, request):
@@ -110,3 +110,31 @@ class NotificacaoViewSet(viewsets.ModelViewSet):
                 {'detail': 'Notificação não encontrada'},
                 status=status.HTTP_404_NOT_FOUND
             )
+    
+    @action(detail=True, methods=['post'])
+    def deletar(self, request, pk=None):
+        """
+        Deleta uma notificação.
+        POST /api/notificacoes/{id}/deletar/
+        """
+        try:
+            notificacao = self.get_object()
+            notificacao.delete()
+            return Response({'status': 'Notificação deletada'})
+        except Notificacao.DoesNotExist:
+            return Response(
+                {'detail': 'Notificação não encontrada'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    @action(detail=False, methods=['post'], url_path='deletar-lidas')
+    def deletar_lidas(self, request):
+        """
+        Deleta todas as notificações lidas.
+        POST /api/notificacoes/deletar-lidas/
+        """
+        deleted_count, _ = self.get_queryset().filter(lida=True).delete()
+        return Response({
+            'status': 'Notificações lidas deletadas',
+            'total': deleted_count
+        })

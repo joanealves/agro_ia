@@ -12,15 +12,8 @@ from .serializers import PragaSerializer
 from .filters import PragaFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import viewsets
-# import tensorflow as tf 
-# from tensorflow.keras.applications import MobileNet
-# from tensorflow.keras.preprocessing import image
-# from tensorflow.keras.applications.mobilenet import preprocess_input, decode_predictions
+from backend.notificacoes.utils import notificar_praga_critica
 import numpy as np
-
-# ❌ TensorFlow comentado temporariamente - instalar se necessário
-# Carregar o modelo de IA uma única vez na inicialização
-# model = MobileNet(weights='imagenet')
 
 
 # ❌ TensorFlow task comentada temporariamente
@@ -90,8 +83,12 @@ class PragaViewSet(viewsets.ModelViewSet):
         return Praga.objects.filter(usuario=self.request.user).order_by('-data_criacao')
 
     def perform_create(self, serializer):
-        # ✅ Salva com o usuário logado automaticamente
-        serializer.save(usuario=self.request.user)
+        # Salva com o usuário logado automaticamente
+        praga = serializer.save(usuario=self.request.user)
+        
+        # Notificar se for praga crítica
+        if praga.nivel == 'critico':
+            notificar_praga_critica(self.request.user, praga)
 
     @action(detail=True, methods=['patch'])
     def atualizar_status(self, request, pk=None):

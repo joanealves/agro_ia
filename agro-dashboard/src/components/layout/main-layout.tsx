@@ -11,7 +11,7 @@
 // }
 
 // export default function MainLayout({ children }: MainLayoutProps) {
-//   const { user, loading } = useAuth();
+//   const { user, isLoading } = useAuth();
 //   const [sidebarOpen, setSidebarOpen] = useState(false);
 //   const pathname = usePathname();
 
@@ -96,7 +96,7 @@ interface MainLayoutProps {
 // =============================================================================
 
 export default function MainLayout({ children }: MainLayoutProps) {
-  const { user, loading } = useAuth();
+  const { user, isLoading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
 
@@ -106,7 +106,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   }, [pathname]);
 
   // Loading state
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <div className="flex flex-col items-center gap-4">

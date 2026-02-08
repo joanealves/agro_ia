@@ -1,15 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import api from '@/lib/api';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useAuth } from '../../../hooks/useAuth';
+import api from '../../../lib/api';
+import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
+import { Button } from '../../../components/ui/button';
 import { AlertCircle, Droplet, Plus } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { IrrigacaoDashboard } from '@/components/dashboard/IrrigacaoDashboard';
-import { IrrigacaoList } from '@/components/dashboard/IrrigacaoList';
-import { IrrigacaoRecomendacao } from '@/components/dashboard/IrrigacaoRecomendacao';
+import { Alert, AlertDescription } from '../../../components/ui/alert';
+import { IrrigacaoDashboard } from '../../../components/dashboard/IrrigacaoDashboard';
+import { IrrigacaoList } from '../../../components/dashboard/IrrigacaoList';
+import { IrrigacaoRecomendacao } from '../../../components/dashboard/IrrigacaoRecomendacao';
 
 interface Fazenda {
     id: number;

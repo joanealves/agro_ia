@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import api from '@/lib/api';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import api from '../../lib/api';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { Badge } from '../../components/ui/badge';
 import { AlertCircle, Lightbulb, Droplet, Gauge } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription } from '../../components/ui/alert';
 
 interface Recomendacao {
     nivel: 'baixo' | 'medio' | 'alto' | 'critico';

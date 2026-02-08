@@ -12,7 +12,7 @@
 // import { Textarea } from "../../../../components/ui/textarea";
 // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select";
 // import { Badge } from "../../../../components/ui/badge";
-// import { Skeleton } from "@/src/components/ui/skeleton";
+// import { Skeleton } from "@/components/ui/skeleton";
 // import {
 //   Dialog,
 //   DialogContent,

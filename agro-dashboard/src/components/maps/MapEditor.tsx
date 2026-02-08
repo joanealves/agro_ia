@@ -294,8 +294,8 @@ import "leaflet-draw/dist/leaflet.draw.css";
 import L from "leaflet";
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
-import { getMapas, createMapa, updateMapa, deleteMapa } from "@/src/lib/api";
-import type { Mapa } from "@/src/types/index";
+import { getMapas, createMapa, updateMapa, deleteMapa } from "@/lib/api";
+import type { Mapa } from "@/types/index";
 
 // Fix de ícones do Leaflet
 const DefaultIcon = L.icon({
@@ -369,7 +369,7 @@ export default function MapEditor({ fazendaId }: Props) {
         if (!layer) return;
 
         const geojson = layer.toGeoJSON();
-        
+
         // ✅ CORREÇÃO 1: Usar camadas_ativas ao invés de camadas
         const featureCollection = {
             type: "FeatureCollection",
@@ -408,8 +408,8 @@ export default function MapEditor({ fazendaId }: Props) {
 
             if (selectedMapa) {
                 // ✅ CORREÇÃO: Usar camadas_ativas
-                updateMapa(fazendaId, selectedMapa.id, { 
-                    camadas_ativas: featureCollection 
+                updateMapa(fazendaId, selectedMapa.id, {
+                    camadas_ativas: featureCollection
                 })
                     .then(() => fetchMapas())
                     .catch((error) => {
@@ -435,7 +435,7 @@ export default function MapEditor({ fazendaId }: Props) {
     function handleLocateFazenda() {
         if (selectedMapa && leafletMapRef.current) {
             leafletMapRef.current.setView(
-                [selectedMapa.latitude, selectedMapa.longitude], 
+                [selectedMapa.latitude, selectedMapa.longitude],
                 selectedMapa.zoom || 15
             );
         }
@@ -468,9 +468,9 @@ export default function MapEditor({ fazendaId }: Props) {
     return (
         <div>
             <h2 className="text-xl font-bold mb-4">Editor de Mapas</h2>
-            
+
             {loading && <p>Carregando mapas...</p>}
-            
+
             <div style={{ marginBottom: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {mapas.length > 0 && (
                     <select
@@ -488,7 +488,7 @@ export default function MapEditor({ fazendaId }: Props) {
                         ))}
                     </select>
                 )}
-                
+
                 <button
                     type="button"
                     className="px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600"
@@ -497,7 +497,7 @@ export default function MapEditor({ fazendaId }: Props) {
                 >
                     Limpar desenhos
                 </button>
-                
+
                 <button
                     type="button"
                     className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -517,11 +517,11 @@ export default function MapEditor({ fazendaId }: Props) {
                 zoom={selectedMapa ? selectedMapa.zoom : 5}
                 style={{ height: "500px", width: "100%", borderRadius: "8px" }}
             >
-                <TileLayer 
+                <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution="&copy; OpenStreetMap contributors"
                 />
-                
+
                 <FeatureGroup
                     ref={drawnItemsRef}
                 >
@@ -531,12 +531,12 @@ export default function MapEditor({ fazendaId }: Props) {
                         onEdited={onEdited}
                         onDeleted={onDeleted}
                     />
-                    
+
                     {/* Renderizar camadas existentes */}
                     {selectedMapa && (() => {
                         const camadas = getCamadas(selectedMapa);
-                        
-                        if (camadas && 
+
+                        if (camadas &&
                             typeof camadas === 'object' &&
                             camadas.type === 'FeatureCollection' &&
                             Array.isArray(camadas.features)) {
@@ -557,11 +557,11 @@ export default function MapEditor({ fazendaId }: Props) {
                                 />
                             );
                         }
-                        
+
                         // Fallback: marcador
                         return (
-                            <Marker 
-                                key={selectedMapa.id} 
+                            <Marker
+                                key={selectedMapa.id}
                                 position={[selectedMapa.latitude, selectedMapa.longitude]}
                             >
                                 <Popup>{selectedMapa.nome}</Popup>
@@ -574,7 +574,7 @@ export default function MapEditor({ fazendaId }: Props) {
             {/* Lista de camadas */}
             {selectedMapa && (() => {
                 const camadas = getCamadas(selectedMapa);
-                
+
                 if (camadas &&
                     typeof camadas === 'object' &&
                     camadas.type === 'FeatureCollection' &&
@@ -586,10 +586,10 @@ export default function MapEditor({ fazendaId }: Props) {
                                 {camadas.features.map((feature: any, idx: number) => (
                                     <li key={idx} className="text-sm">
                                         Tipo: {feature.geometry?.type}
-                                        {feature.geometry?.type === 'Polygon' && 
+                                        {feature.geometry?.type === 'Polygon' &&
                                             ` | Pontos: ${feature.geometry.coordinates[0]?.length}`
                                         }
-                                        {feature.geometry?.type === 'Point' && 
+                                        {feature.geometry?.type === 'Point' &&
                                             ` | Coordenadas: ${feature.geometry.coordinates.join(', ')}`
                                         }
                                     </li>

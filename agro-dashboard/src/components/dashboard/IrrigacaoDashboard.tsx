@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import api from '@/lib/api';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import api from '../../lib/api';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import {
     LineChart,
     Line,
@@ -18,8 +18,9 @@ import {
     Pie,
     Cell,
 } from 'recharts';
-import { AlertCircle, Droplet, TrendingUp, Calendar } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, Droplet, TrendingUp, Calendar, Loader2 } from 'lucide-react';
+import { Alert, AlertDescription } from '../../components/ui/alert';
+import { Skeleton } from '../../components/ui/skeleton';
 
 interface IrrigacaoDashboardProps {
     fazendaId: number;
@@ -87,7 +88,7 @@ export function IrrigacaoDashboard({ fazendaId, climaData }: IrrigacaoDashboardP
 
             // Calcular estatísticas
             const consumoTotal = irrigacoes.reduce(
-                (sum, i) => sum + (i.consumo_medio_litros || 0),
+                (sum: number, i: any) => sum + (i.consumo_medio_litros || 0),
                 0
             );
             const consumoMedio = consumoTotal / 7;
@@ -134,8 +135,20 @@ export function IrrigacaoDashboard({ fazendaId, climaData }: IrrigacaoDashboardP
         }
     };
 
+    if (loading) {
+        return (
+            <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Skeleton className="h-32 w-full" />
+                    <Skeleton className="h-32 w-full" />
+                </div>
+                <Skeleton className="h-80 w-full" />
+            </div>
+        );
+    }
+
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 animate-in fade-in duration-500">
             {error && (
                 <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
@@ -145,7 +158,7 @@ export function IrrigacaoDashboard({ fazendaId, climaData }: IrrigacaoDashboardP
 
             {/* Cards de Resumo */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card>
+                <Card className="hover:shadow-md transition-shadow">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium flex items-center gap-2">
                             <Droplet className="h-4 w-4 text-blue-500" />
@@ -153,12 +166,14 @@ export function IrrigacaoDashboard({ fazendaId, climaData }: IrrigacaoDashboardP
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-3xl font-bold">{Math.round(stats.consumoTotal).toLocaleString('pt-BR')}</p>
+                        <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                            {Math.round(stats.consumoTotal).toLocaleString('pt-BR')}
+                        </p>
                         <p className="text-xs text-muted-foreground mt-1">litros de água</p>
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="hover:shadow-md transition-shadow">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium flex items-center gap-2">
                             <TrendingUp className="h-4 w-4 text-green-500" />
@@ -166,7 +181,9 @@ export function IrrigacaoDashboard({ fazendaId, climaData }: IrrigacaoDashboardP
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-3xl font-bold">{Math.round(stats.consumoMedio).toLocaleString('pt-BR')}</p>
+                        <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+                            {Math.round(stats.consumoMedio).toLocaleString('pt-BR')}
+                        </p>
                         <p className="text-xs text-muted-foreground mt-1">litros por dia</p>
                     </CardContent>
                 </Card>
@@ -189,7 +206,12 @@ export function IrrigacaoDashboard({ fazendaId, climaData }: IrrigacaoDashboardP
                                 <YAxis label={{ value: 'Litros', angle: -90, position: 'insideLeft' }} />
                                 <Tooltip
                                     formatter={(value) => `${Math.round(value as number).toLocaleString('pt-BR')} L`}
-                                    contentStyle={{ backgroundColor: '#f9fafb', border: '1px solid #e5e7eb' }}
+                                    contentStyle={{
+                                        backgroundColor: 'hsl(var(--card))',
+                                        border: '1px solid hsl(var(--border))',
+                                        borderRadius: '8px'
+                                    }}
+                                    labelStyle={{ color: 'hsl(var(--foreground))' }}
                                 />
                                 <Legend />
                                 <Bar dataKey="consumo" fill="#3b82f6" name="Consumo (L)" radius={[8, 8, 0, 0]} />
@@ -216,7 +238,14 @@ export function IrrigacaoDashboard({ fazendaId, climaData }: IrrigacaoDashboardP
                                     orientation="right"
                                     label={{ value: 'Temperatura (°C)', angle: 90, position: 'insideRight' }}
                                 />
-                                <Tooltip contentStyle={{ backgroundColor: '#f9fafb', border: '1px solid #e5e7eb' }} />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: 'hsl(var(--card))',
+                                        border: '1px solid hsl(var(--border))',
+                                        borderRadius: '8px'
+                                    }}
+                                    labelStyle={{ color: 'hsl(var(--foreground))' }}
+                                />
                                 <Legend />
                                 <Line
                                     yAxisId="left"
@@ -251,13 +280,13 @@ export function IrrigacaoDashboard({ fazendaId, climaData }: IrrigacaoDashboardP
                             {stats.sistemasMaisUsados.map((sistema, idx) => (
                                 <div
                                     key={idx}
-                                    className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
                                 >
                                     <span className="text-sm font-medium">{sistema.nome}</span>
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-32 bg-gray-200 rounded-full h-2">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-32 bg-secondary rounded-full h-2 overflow-hidden">
                                             <div
-                                                className="h-full rounded-full bg-blue-500"
+                                                className="h-full rounded-full bg-blue-500 transition-all duration-500"
                                                 style={{
                                                     width: `${(
                                                         (sistema.consumo /

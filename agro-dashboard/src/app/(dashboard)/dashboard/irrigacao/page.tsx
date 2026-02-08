@@ -11,9 +11,9 @@ import { Badge } from "../../../../components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select";
 import { Skeleton } from "../../../../components/ui/skeleton";
 import { Progress } from "../../../../components/ui/progress";
-import { 
-  Droplets, 
-  RefreshCw, 
+import {
+  Droplets,
+  RefreshCw,
   AlertTriangle,
   Play,
   Pause,
@@ -69,8 +69,8 @@ export default function IrrigacaoPage() {
     agendadas: irrigacoes.filter(i => i.status === "agendada").length,
     concluidas: irrigacoes.filter(i => i.status === "concluida").length,
     volumeTotal: irrigacoes.reduce((acc, i) => acc + (i.quantidade_agua || 0), 0),
-    umidadeMedia: climaData.length > 0 
-      ? climaData.reduce((acc, c) => acc + c.umidade, 0) / climaData.length 
+    umidadeMedia: climaData.length > 0
+      ? climaData.reduce((acc, c) => acc + c.umidade, 0) / climaData.length
       : 0
   };
 
@@ -95,9 +95,9 @@ export default function IrrigacaoPage() {
   };
 
   // Necessidade de irrigação baseada na umidade
-  const necessidadeIrrigacao = stats.umidadeMedia < 40 ? "Alta" 
-    : stats.umidadeMedia < 60 ? "Média" 
-    : "Baixa";
+  const necessidadeIrrigacao = stats.umidadeMedia < 40 ? "Alta"
+    : stats.umidadeMedia < 60 ? "Média"
+      : "Baixa";
 
   // =============================================================================
   // RENDER
@@ -116,7 +116,7 @@ export default function IrrigacaoPage() {
             Gestão e monitoramento de irrigação
           </p>
         </div>
-        
+
         <div className="flex items-center gap-4">
           <Select value={selectedFazenda} onValueChange={setSelectedFazenda}>
             <SelectTrigger className="w-[200px]">
@@ -131,7 +131,7 @@ export default function IrrigacaoPage() {
               ))}
             </SelectContent>
           </Select>
-          
+
           <Button variant="outline" onClick={fetchData} disabled={loading}>
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Atualizar
@@ -210,18 +210,16 @@ export default function IrrigacaoPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Necessidade</CardTitle>
-              <AlertTriangle className={`h-4 w-4 ${
-                necessidadeIrrigacao === "Alta" ? "text-red-500" 
-                : necessidadeIrrigacao === "Média" ? "text-yellow-500" 
-                : "text-green-500"
-              }`} />
+              <AlertTriangle className={`h-4 w-4 ${necessidadeIrrigacao === "Alta" ? "text-red-500"
+                  : necessidadeIrrigacao === "Média" ? "text-yellow-500"
+                    : "text-green-500"
+                }`} />
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${
-                necessidadeIrrigacao === "Alta" ? "text-red-500" 
-                : necessidadeIrrigacao === "Média" ? "text-yellow-500" 
-                : "text-green-500"
-              }`}>
+              <div className={`text-2xl font-bold ${necessidadeIrrigacao === "Alta" ? "text-red-500"
+                  : necessidadeIrrigacao === "Média" ? "text-yellow-500"
+                    : "text-green-500"
+                }`}>
                 {necessidadeIrrigacao}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
@@ -242,7 +240,7 @@ export default function IrrigacaoPage() {
                 Recomendação de Irrigação
               </p>
               <p className="text-sm text-muted-foreground">
-                A umidade está abaixo do ideal ({stats.umidadeMedia.toFixed(1)}%). 
+                A umidade está abaixo do ideal ({stats.umidadeMedia.toFixed(1)}%).
                 Considere iniciar uma irrigação nas próximas horas.
               </p>
             </div>
@@ -321,8 +319,8 @@ export default function IrrigacaoPage() {
           ) : irrigacoes.length > 0 ? (
             <div className="space-y-4">
               {irrigacoes.map((irrigacao) => (
-                <div 
-                  key={irrigacao.id} 
+                <div
+                  key={irrigacao.id}
                   className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-center gap-4">
@@ -334,7 +332,7 @@ export default function IrrigacaoPage() {
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
-                          {new Date(irrigacao.data).toLocaleDateString('pt-BR')}
+                          {irrigacao.data ? new Date(irrigacao.data).toLocaleDateString('pt-BR') : '-'}
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
@@ -347,16 +345,16 @@ export default function IrrigacaoPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
                     <Badge variant={
-                      irrigacao.status === "em_andamento" ? "default" 
-                      : irrigacao.status === "concluida" ? "secondary"
-                      : "outline"
+                      irrigacao.status === "em_andamento" ? "default"
+                        : irrigacao.status === "concluida" ? "secondary"
+                          : "outline"
                     }>
                       {getStatusLabel(irrigacao.status)}
                     </Badge>
-                    
+
                     {irrigacao.status === "em_andamento" && (
                       <Button variant="ghost" size="icon">
                         <Pause className="h-4 w-4" />

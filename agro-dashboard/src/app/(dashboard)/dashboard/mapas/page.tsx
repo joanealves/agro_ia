@@ -70,7 +70,7 @@ export default function MapasPage() {
   const [filtro, setFiltro] = useState("");
   const [selectedMapa, setSelectedMapa] = useState<MapaData | null>(null);
   const [showDialog, setShowDialog] = useState(false);
-  const [novoMapa, setNovoMapa] = useState({ nome: "", latitude: 0, longitude: 0, zoom: 10, fazenda_id: undefined });
+  const [novoMapa, setNovoMapa] = useState({ nome: "", latitude: 0, longitude: 0, zoom: 10, fazenda_id: undefined as number | undefined });
 
   useEffect(() => {
     const fetchFazendas = async () => {

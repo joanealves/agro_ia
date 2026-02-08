@@ -7,7 +7,7 @@
 // import Header from '../../../components/layout/Header';
 
 // export default function AdminPage() {
-//   const { user, loading } = useAuth();
+//   const { user, isLoading } = useAuth();
 //   const router = useRouter();
 
 //   useEffect(() => {
@@ -42,7 +42,7 @@
 // import Header from "../../../components/layout/Header";
 
 // export default function AdminPage() {
-//   const { user, loading } = useAuth();
+//   const { user, isLoading } = useAuth();
 //   const router = useRouter();
 
 //   useEffect(() => {
@@ -100,21 +100,21 @@ import Link from "next/link";
 // =============================================================================
 
 export default function AdminPage() {
-  const { user, loading } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
 
   // Proteção de rota - só admin pode acessar
   useEffect(() => {
-    if (!loading && !user) {
+    if (!isLoading && !user) {
       router.push("/login");
     }
-    if (!loading && user?.role !== "admin") {
+    if (!isLoading && user?.role !== "admin") {
       router.push("/dashboard");
     }
-  }, [user, loading, router]);
+  }, [user, isLoading, router]);
 
   // Loading enquanto verifica permissões
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <p className="text-muted-foreground">Verificando permissões...</p>
