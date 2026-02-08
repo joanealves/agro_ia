@@ -47,16 +47,23 @@ export default function ClimaPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Carregar fazendas uma vez
+  useEffect(() => {
+    getFazendas().then((data) => {
+      setFazendas(data);
+      if (data.length > 0 && selectedFazenda === "all") {
+        setSelectedFazenda(data[0].id.toString());
+      }
+    });
+  }, []);
+
   const fetchData = useCallback(async () => {
+    if (selectedFazenda === "all") return;
     setLoading(true);
     setError(null);
     try {
-      const [climaData, fazendasData] = await Promise.all([
-        getDadosClimaticos(selectedFazenda !== "all" ? parseInt(selectedFazenda) : undefined),
-        getFazendas()
-      ]);
+      const climaData = await getDadosClimaticos(parseInt(selectedFazenda));
       setDados(climaData);
-      setFazendas(fazendasData);
     } catch (err) {
       console.error("Erro ao carregar dados climáticos:", err);
       setError("Não foi possível carregar os dados climáticos. Verifique se o backend está rodando.");

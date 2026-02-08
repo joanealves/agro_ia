@@ -65,8 +65,9 @@ class DadosProdutividadeSerializer(serializers.ModelSerializer):
 
     def get_lucro_por_hectare(self, obj):
         """Calcula lucro por hectare"""
+        from decimal import Decimal
         if obj.lucro_total and obj.area_hectares and obj.area_hectares > 0:
-            return round(obj.lucro_total / obj.area_hectares, 2)
+            return round(obj.lucro_total / Decimal(str(obj.area_hectares)), 2)
         return None
 
     def get_margem_lucro(self, obj):

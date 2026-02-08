@@ -98,7 +98,6 @@ class ClimaViewSet(viewsets.ViewSet):
         dados = DadosClimaticos.objects.filter(
             fazenda_id=fazenda_id,
             data_coleta__gte=data_inicio,
-            e_previsao=False
         ).order_by('-data_coleta')
         
         serializer = DadosClimaticosSerializer(dados, many=True)
@@ -128,7 +127,6 @@ class ClimaViewSet(viewsets.ViewSet):
         resumo = DadosClimaticos.objects.filter(
             fazenda_id=fazenda_id,
             data_coleta__gte=data_inicio,
-            e_previsao=False
         ).aggregate(
             temp_media=Avg('temperatura'),
             umidade_media=Avg('umidade'),

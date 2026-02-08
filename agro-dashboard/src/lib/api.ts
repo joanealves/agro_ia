@@ -273,9 +273,9 @@ export async function marcarTodasLidas(): Promise<void> {
 
 export async function getDadosClimaticos(fazendaId?: number): Promise<DadosClimaticos[]> {
   try {
-    const url = fazendaId 
-      ? `/api/irrigacao/clima/?fazenda=${fazendaId}` 
-      : "/api/irrigacao/clima/";
+    const url = fazendaId
+      ? `/api/irrigacao/clima/historico/?fazenda=${fazendaId}`
+      : "/api/irrigacao/clima/historico/";
     const response: AxiosResponse = await api.get(url);
     return extractData<DadosClimaticos>(response.data);
   } catch (error) {
@@ -286,7 +286,7 @@ export async function getDadosClimaticos(fazendaId?: number): Promise<DadosClima
 
 export async function getClimaAtual(fazendaId: number): Promise<DadosClimaticos | null> {
   try {
-    const { data } = await api.get<DadosClimaticos>(`/api/irrigacao/clima/atual/?fazenda=${fazendaId}`);
+    const { data } = await api.get<DadosClimaticos>(`/api/irrigacao/clima/atual/${fazendaId}/`);
     return data;
   } catch (error) {
     logError("getClimaAtual", error);

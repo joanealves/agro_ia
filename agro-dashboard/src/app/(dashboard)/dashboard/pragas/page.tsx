@@ -613,10 +613,13 @@ export default function PragasPage() {
       
       // Mostrar erro detalhado
       if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: Record<string, unknown> } };
+        const axiosErr = err as { response?: { status?: number; data?: unknown } };
         const errorData = axiosErr.response?.data;
-        if (errorData) {
-          const messages = Object.entries(errorData)
+        const statusCode = axiosErr.response?.status;
+        if (statusCode === 500) {
+          setError("Erro interno do servidor. Tente novamente.");
+        } else if (errorData && typeof errorData === 'object' && !Array.isArray(errorData)) {
+          const messages = Object.entries(errorData as Record<string, unknown>)
             .map(([key, value]) => `${key}: ${value}`)
             .join(", ");
           setError(`Erro ao registrar praga: ${messages}`);
