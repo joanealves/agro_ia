@@ -231,7 +231,7 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
   { title: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
   { title: "Fazendas", path: "/dashboard/fazendas", icon: Home },
-  { title: "Mapas", path: "/dashboard/mapas", icon: Map },
+  { title: "Talhões", path: "/dashboard/talhoes", icon: Map },
   { title: "Clima", path: "/dashboard/clima", icon: Cloud },
   { title: "Pragas", path: "/dashboard/pragas", icon: Bug },
   { title: "Produtividade", path: "/dashboard/produtividade", icon: BarChart3 },
@@ -339,7 +339,7 @@ export default function Sidebar({ className }: SidebarProps) {
               Menu
             </p>
           )}
-          
+
           {menuItems.map((item) => (
             <SidebarItem
               key={item.path}

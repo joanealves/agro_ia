@@ -40,8 +40,8 @@ urlpatterns = [
     path('api/fazendas/', include('backend.fazenda.urls')),
     path('api/fazenda/', include('backend.fazenda.urls')),  # Compatibilidade
     
-    # Talhões (novo módulo CORE)
-    # path('api/talhoes/', include('backend.talhoes.urls')),  # A criar
+    # Talhões (novo módulo CORE) ✅ CRIADO
+    path('api/talhoes/', include('backend.talhoes.urls')),
     
     # Pragas
     path('api/pragas/', include('backend.pragas.urls')),

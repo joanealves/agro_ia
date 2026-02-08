@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'backend.notificacoes',
     'backend.maps',
     'backend.fazenda',
+    'backend.talhoes',  # ✅ NOVO: Talhões
 ]
 
 # ✅ IMPORTANTE: Definir modelo de usuário customizado
