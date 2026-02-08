@@ -64,12 +64,15 @@ class NotificacaoListSerializer(serializers.ModelSerializer):
         model = Notificacao
         fields = [
             'id',
+            'usuario_nome',
             'titulo',
+            'mensagem',
             'tipo',
             'categoria',
             'prioridade',
             'lida',
             'acao_requerida',
+            'link',
             'data_criacao',
             'dias_atras',
         ]

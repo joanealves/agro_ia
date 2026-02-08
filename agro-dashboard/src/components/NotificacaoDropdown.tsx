@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Bell, X, Check, Archive, Trash2 } from 'lucide-react';
+import { Bell, X, Check, Trash2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import axios from 'axios';
+import api from '../lib/api';
 
 interface Notificacao {
     id: number;
@@ -53,11 +53,11 @@ export function NotificacaoDropdown({ className = '' }: NotificacaoDropdownProps
         const buscarNotificacoes = async () => {
             try {
                 setCarregando(true);
-                const response = await axios.get('http://localhost:8000/api/notificacoes/recentes/');
+                const response = await api.get('/api/notificacoes/recentes/');
                 setNotificacoes(response.data);
 
                 // Buscar contagem de não lidas
-                const countResponse = await axios.get('http://localhost:8000/api/notificacoes/contagem/');
+                const countResponse = await api.get('/api/notificacoes/contagem/');
                 setNaoLidas(countResponse.data.count);
             } catch (err) {
                 console.error('Erro ao buscar notificações:', err);
@@ -74,7 +74,7 @@ export function NotificacaoDropdown({ className = '' }: NotificacaoDropdownProps
 
     const marcarComoLida = async (id: number) => {
         try {
-            await axios.post(`http://localhost:8000/api/notificacoes/${id}/ler/`);
+            await api.post(`/api/notificacoes/${id}/ler/`);
             setNotificacoes((prev) =>
                 prev.map((n) => (n.id === id ? { ...n, lida: true } : n))
             );
@@ -86,7 +86,7 @@ export function NotificacaoDropdown({ className = '' }: NotificacaoDropdownProps
 
     const marcarTodasComoLida = async () => {
         try {
-            await axios.post('http://localhost:8000/api/notificacoes/ler-todas/');
+            await api.post('/api/notificacoes/ler-todas/');
             setNotificacoes((prev) => prev.map((n) => ({ ...n, lida: true })));
             setNaoLidas(0);
         } catch (err) {
@@ -96,7 +96,7 @@ export function NotificacaoDropdown({ className = '' }: NotificacaoDropdownProps
 
     const deletarNotificacao = async (id: number) => {
         try {
-            await axios.post(`http://localhost:8000/api/notificacoes/${id}/deletar/`);
+            await api.post(`/api/notificacoes/${id}/deletar/`);
             setNotificacoes((prev) => prev.filter((n) => n.id !== id));
         } catch (err) {
             console.error('Erro ao deletar:', err);
@@ -105,7 +105,7 @@ export function NotificacaoDropdown({ className = '' }: NotificacaoDropdownProps
 
     const deletarLidas = async () => {
         try {
-            await axios.post('http://localhost:8000/api/notificacoes/deletar-lidas/');
+            await api.post('/api/notificacoes/deletar-lidas/');
             setNotificacoes((prev) => prev.filter((n) => !n.lida));
         } catch (err) {
             console.error('Erro ao deletar lidas:', err);

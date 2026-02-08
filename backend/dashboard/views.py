@@ -21,7 +21,7 @@ class DashboardView(APIView):
 
         produtividade_por_fazenda = (
             DadosProdutividade.objects.values("fazenda__nome")
-            .annotate(media_produtividade=Avg("produtividade"))
+            .annotate(media_produtividade=Avg("rendimento_kg_ha"))
             .order_by("-media_produtividade")
         )
 
@@ -32,10 +32,10 @@ class DashboardView(APIView):
         })
 
 class DadosProdutividadeFilter(django_filters.FilterSet):
-    cultura = django_filters.CharFilter(lookup_expr='icontains')  
-    data_inicio = django_filters.DateFilter(field_name="data", lookup_expr="gte")  
-    data_fim = django_filters.DateFilter(field_name="data", lookup_expr="lte") 
-    fazenda = django_filters.NumberFilter(field_name="fazenda__id")  
+    cultura = django_filters.CharFilter(lookup_expr='icontains')
+    data_inicio = django_filters.DateFilter(field_name="data_plantio", lookup_expr="gte")
+    data_fim = django_filters.DateFilter(field_name="data_colheita", lookup_expr="lte")
+    fazenda = django_filters.NumberFilter(field_name="fazenda__id")
 
     class Meta:
         model = DadosProdutividade
@@ -44,5 +44,5 @@ class DadosProdutividadeFilter(django_filters.FilterSet):
 # Adicione a classe ProdutividadeSerieTemporalView
 class ProdutividadeSerieTemporalView(APIView):
     def get(self, request, *args, **kwargs):
-        dados = DadosProdutividade.objects.values('data', 'produtividade').order_by('data')
+        dados = DadosProdutividade.objects.values('data_registro', 'rendimento_kg_ha').order_by('data_registro')
         return Response({"dados": list(dados)})
