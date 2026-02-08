@@ -58,7 +58,6 @@ urlpatterns = [
     
     # Mapas (CORRIGIDO: frontend chama /api/mapas/)
     path('api/mapas/', include('backend.maps.urls')),
-    path('api/maps/', include('backend.maps.urls')),  # Compatibilidade
     
     # Dashboard
     path('api/dashboard/', include('backend.dashboard.urls')),

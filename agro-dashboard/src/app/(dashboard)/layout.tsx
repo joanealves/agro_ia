@@ -7,8 +7,8 @@
 
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../../app/providers/AuthProvider";
-import MainLayout from "../../components/layout/main-layout";
+import { useAuth } from "@/hooks/useAuth";
+import MainLayout from "@/components/layout/main-layout";
 
 // =============================================================================
 // DASHBOARD LAYOUT COMPONENT

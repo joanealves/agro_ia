@@ -144,7 +144,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "../ui/avatar";
-import { useAuth } from "../../app/providers/AuthProvider";
+import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "../ui/badge";
 
 interface HeaderProps {
@@ -203,7 +203,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <Button variant="ghost" size="icon" className="relative" asChild>
             <a href="/dashboard/notificacoes">
               <Bell className="h-5 w-5" />
-              <Badge 
+              <Badge
                 className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
                 variant="destructive"
               >

@@ -204,7 +204,7 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card";
 import { Alert, AlertDescription } from "../../components/ui/alert";
-import { useAuth } from "../../app/providers/AuthProvider";
+import { useAuth } from "@/hooks/useAuth";
 
 // =============================================================================
 // LOGIN PAGE COMPONENT
@@ -228,7 +228,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      await login(email, password);
+      await login({ email, password });
       router.push(callbackUrl);
     } catch (err) {
       console.error("Erro no login:", err);

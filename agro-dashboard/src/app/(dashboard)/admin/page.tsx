@@ -88,7 +88,7 @@
 // Esta página deve conter APENAS o conteúdo interno.
 // =============================================================================
 
-import { useAuth } from "../../../app/providers/AuthProvider";
+import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";

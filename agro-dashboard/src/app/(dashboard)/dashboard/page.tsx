@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { 
-  Home, 
-  Bug, 
-  Cloud, 
-  Bell, 
-  Droplets, 
+import {
+  Home,
+  Bug,
+  Cloud,
+  Bell,
+  Droplets,
   TrendingUp,
   Loader2,
   AlertTriangle,
@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
-import { useAuth } from "../../providers/AuthProvider";
+import { useAuth } from "@/hooks/useAuth";
 import { getDashboardData } from "../../../lib/api";
 import type { DashboardData } from "../../../types";
 
@@ -32,7 +32,7 @@ function StatCard({ title, value, description, icon: Icon, variant = "default" }
   const variantStyles = {
     default: "",
     success: "border-green-500/30 bg-green-500/5",
-    warning: "border-yellow-500/30 bg-yellow-500/5", 
+    warning: "border-yellow-500/30 bg-yellow-500/5",
     danger: "border-red-500/30 bg-red-500/5",
   };
 
@@ -72,7 +72,7 @@ export default function DashboardPage() {
       setLoading(true);
       setError(null);
       const dashboardData = await getDashboardData();
-      
+
       if (dashboardData && typeof dashboardData === 'object') {
         setData(dashboardData);
       } else {
@@ -80,7 +80,7 @@ export default function DashboardPage() {
       }
     } catch (err: any) {
       console.error("Erro ao carregar dashboard:", err);
-      
+
       if (err?.response?.status === 401) {
         setError("Sessão expirada. Faça login novamente.");
       } else if (err?.response?.status === 404) {
@@ -211,11 +211,11 @@ export default function DashboardPage() {
               value={
                 displayData.produtividade.length > 0
                   ? `${(
-                      displayData.produtividade.reduce(
-                        (sum, p) => sum + (p.media_produtividade || 0),
-                        0
-                      ) / displayData.produtividade.length
-                    ).toFixed(0)} kg/ha`
+                    displayData.produtividade.reduce(
+                      (sum, p) => sum + (p.media_produtividade || 0),
+                      0
+                    ) / displayData.produtividade.length
+                  ).toFixed(0)} kg/ha`
                   : "N/A"
               }
               description="Média geral"
@@ -242,8 +242,8 @@ export default function DashboardPage() {
                     const maxProd = Math.max(
                       ...displayData.produtividade.map(p => p.media_produtividade || 0)
                     );
-                    const percentage = maxProd > 0 
-                      ? ((item.media_produtividade || 0) / maxProd) * 100 
+                    const percentage = maxProd > 0
+                      ? ((item.media_produtividade || 0) / maxProd) * 100
                       : 0;
 
                     return (
@@ -255,7 +255,7 @@ export default function DashboardPage() {
                           </span>
                         </div>
                         <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                          <div 
+                          <div
                             className="h-full bg-primary rounded-full transition-all"
                             style={{ width: `${percentage}%` }}
                           />

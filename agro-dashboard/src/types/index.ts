@@ -166,6 +166,7 @@ export interface Mapa {
   longitude: number;
   zoom: number;
   camadas?: any; // GeoJSON ou estrutura de camadas
+  camadas_ativas?: any; // Adicionada para suportar camadas ativas
   data_criacao?: string;
   data_atualizacao?: string;
 }

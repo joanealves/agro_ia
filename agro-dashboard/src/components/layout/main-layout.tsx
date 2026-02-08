@@ -81,7 +81,7 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Sidebar from "../../components/layout/Sidebar";
 import Header from "../../components/layout/Header";
-import { useAuth } from "../../app/providers/AuthProvider";
+import { useAuth } from "@/hooks/useAuth";
 
 // =============================================================================
 // TYPES
@@ -144,9 +144,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
       {/* Sidebar Mobile */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 transform transition-transform duration-200 ease-in-out md:hidden ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 transform transition-transform duration-200 ease-in-out md:hidden ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <Sidebar />
       </div>

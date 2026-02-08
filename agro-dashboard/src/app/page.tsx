@@ -11,15 +11,15 @@ export default function Page() {
         <Image
           src={agroTechImage}
           alt="AgroTech"
-          layout="fill"
-          objectFit="cover"
-          className="rounded-2xl"
+          fill
+          className="object-cover"
+          priority
         />
       </div>
 
-      {/* Board com texto e botão */}
+      {/* Board com texto e botao */}
       <div className="absolute inset-0 z-10 flex items-center justify-center">
-        <div className="bg-black bg-opacity-20 p-8 rounded-2xl shadow-2xl max-w-md text-center">
+        <div className="bg-black/50 p-8 rounded-2xl shadow-2xl max-w-md text-center backdrop-blur-sm">
           <h1 className="text-4xl font-bold mb-4 text-white">Bem-vindo ao AgroTech</h1>
           <p className="text-lg mb-8 text-white">
             Soluções inteligentes para o agronegócio. Gerencie sua fazenda de

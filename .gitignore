@@ -1,4 +1,39 @@
 venv/
 *.dll
 *.pyd
-*.env
+
+# Environment variables (NUNCA commitar credenciais)
+.env
+.env.local
+.env.*.local
+
+# Database
+*.sqlite3
+db.sqlite3
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+
+# Node
+node_modules/
+.next/
+out/
+dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
