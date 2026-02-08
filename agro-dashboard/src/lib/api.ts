@@ -273,11 +273,23 @@ export async function marcarTodasLidas(): Promise<void> {
 
 export async function getDadosClimaticos(fazendaId?: number): Promise<DadosClimaticos[]> {
   try {
-    const url = fazendaId
-      ? `/api/irrigacao/clima/historico/?fazenda=${fazendaId}`
-      : "/api/irrigacao/clima/historico/";
-    const response: AxiosResponse = await api.get(url);
-    return extractData<DadosClimaticos>(response.data);
+    if (fazendaId) {
+      const response: AxiosResponse = await api.get(`/api/irrigacao/clima/historico/?fazenda=${fazendaId}`);
+      return extractData<DadosClimaticos>(response.data);
+    }
+
+    // Sem fazenda específica: buscar de todas as fazendas do usuário
+    const fazendas = await getFazendas();
+    if (fazendas.length === 0) return [];
+
+    const results = await Promise.all(
+      fazendas.map(f =>
+        api.get(`/api/irrigacao/clima/historico/?fazenda=${f.id}`)
+          .then(res => extractData<DadosClimaticos>(res.data))
+          .catch(() => [] as DadosClimaticos[])
+      )
+    );
+    return results.flat();
   } catch (error) {
     logError("getDadosClimaticos", error);
     return [];

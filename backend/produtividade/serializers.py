@@ -11,6 +11,11 @@ class DadosProdutividadeSerializer(serializers.ModelSerializer):
     fazenda_nome = serializers.CharField(source='fazenda.nome', read_only=True)
     usuario_nome = serializers.CharField(source='usuario.username', read_only=True)
 
+    # Aliases de compatibilidade com o frontend
+    area = serializers.FloatField(source='area_hectares', read_only=True)
+    produtividade = serializers.SerializerMethodField(read_only=True)
+    data = serializers.DateField(source='data_colheita', read_only=True)
+
     # Campos calculados
     dias_cultivo = serializers.SerializerMethodField(read_only=True)
     lucro_por_hectare = serializers.SerializerMethodField(read_only=True)
@@ -44,6 +49,10 @@ class DadosProdutividadeSerializer(serializers.ModelSerializer):
             'lucro_por_hectare',
             'margem_lucro',
             'observacoes',
+            # Aliases de compatibilidade frontend
+            'area',
+            'produtividade',
+            'data',
         ]
         read_only_fields = [
             'usuario',
@@ -56,6 +65,10 @@ class DadosProdutividadeSerializer(serializers.ModelSerializer):
             'lucro_por_hectare',
             'margem_lucro',
         ]
+
+    def get_produtividade(self, obj):
+        """Alias: retorna rendimento_kg_ha ou 0 como fallback"""
+        return obj.rendimento_kg_ha or 0
 
     def get_dias_cultivo(self, obj):
         """Calcula dias entre plantio e colheita"""

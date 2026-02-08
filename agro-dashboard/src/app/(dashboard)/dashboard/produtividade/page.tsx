@@ -95,16 +95,16 @@ export default function ProdutividadePage() {
 
   // Calcular estatísticas
   const stats = {
-    prodMedia: filteredDados.length > 0 
-      ? filteredDados.reduce((acc, d) => acc + d.produtividade, 0) / filteredDados.length 
+    prodMedia: filteredDados.length > 0
+      ? filteredDados.reduce((acc, d) => acc + (d.produtividade || 0), 0) / filteredDados.length
       : 0,
-    areaTotal: filteredDados.reduce((acc, d) => acc + d.area, 0),
+    areaTotal: filteredDados.reduce((acc, d) => acc + (d.area || 0), 0),
     totalRegistros: filteredDados.length,
-    melhorProd: filteredDados.length > 0 
-      ? Math.max(...filteredDados.map(d => d.produtividade))
+    melhorProd: filteredDados.length > 0
+      ? Math.max(...filteredDados.map(d => d.produtividade || 0))
       : 0,
-    piorProd: filteredDados.length > 0 
-      ? Math.min(...filteredDados.map(d => d.produtividade))
+    piorProd: filteredDados.length > 0
+      ? Math.min(...filteredDados.map(d => d.produtividade || 0))
       : 0,
   };
 
@@ -114,10 +114,10 @@ export default function ProdutividadePage() {
     const fazendaDados = filteredDados.filter(d => getFazendaId(d.fazenda) === f.id);
     return {
       nome: f.nome,
-      produtividade: fazendaDados.length > 0 
-        ? fazendaDados.reduce((acc, d) => acc + d.produtividade, 0) / fazendaDados.length
+      produtividade: fazendaDados.length > 0
+        ? fazendaDados.reduce((acc, d) => acc + (d.produtividade || 0), 0) / fazendaDados.length
         : 0,
-      area: fazendaDados.reduce((acc, d) => acc + d.area, 0)
+      area: fazendaDados.reduce((acc, d) => acc + (d.area || 0), 0)
     };
   }).filter(f => f.produtividade > 0);
 
@@ -126,21 +126,22 @@ export default function ProdutividadePage() {
     const culturaDados = dados.filter(d => d.cultura === cultura);
     return {
       nome: cultura,
-      value: culturaDados.reduce((acc, d) => acc + d.area, 0),
-      prodMedia: culturaDados.length > 0 
-        ? culturaDados.reduce((acc, d) => acc + d.produtividade, 0) / culturaDados.length
+      value: culturaDados.reduce((acc, d) => acc + (d.area || 0), 0),
+      prodMedia: culturaDados.length > 0
+        ? culturaDados.reduce((acc, d) => acc + (d.produtividade || 0), 0) / culturaDados.length
         : 0
     };
   });
 
   // Dados para evolução temporal
   const evolucaoTemporal = filteredDados
+    .filter(d => d.data)
     .slice()
     .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime())
     .slice(-20)
     .map(d => ({
       data: new Date(d.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
-      produtividade: d.produtividade,
+      produtividade: d.produtividade || 0,
       cultura: d.cultura
     }));
 
@@ -312,11 +313,11 @@ export default function ProdutividadePage() {
                       backgroundColor: 'hsl(var(--card))', 
                       border: '1px solid hsl(var(--border))' 
                     }}
-                    formatter={(value: number) => [`${value.toFixed(0)} kg/ha`, 'Produtividade']}
+                    formatter={(value: number) => [`${(value ?? 0).toFixed(0)} kg/ha`, 'Produtividade']}
                   />
-                  <Bar 
-                    dataKey="produtividade" 
-                    fill="hsl(var(--primary))" 
+                  <Bar
+                    dataKey="produtividade"
+                    fill="hsl(var(--primary))"
                     radius={[0, 4, 4, 0]}
                   />
                 </BarChart>
@@ -360,7 +361,7 @@ export default function ProdutividadePage() {
                       backgroundColor: 'hsl(var(--card))', 
                       border: '1px solid hsl(var(--border))' 
                     }}
-                    formatter={(value: number) => [`${value.toFixed(1)} ha`, 'Área']}
+                    formatter={(value: number) => [`${(value ?? 0).toFixed(1)} ha`, 'Área']}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -393,10 +394,10 @@ export default function ProdutividadePage() {
                     backgroundColor: 'hsl(var(--card))', 
                     border: '1px solid hsl(var(--border))' 
                   }}
-                  formatter={(value: number) => [`${value.toFixed(0)} kg/ha`, 'Produtividade']}
+                  formatter={(value: number) => [`${(value ?? 0).toFixed(0)} kg/ha`, 'Produtividade']}
                 />
-                <Line 
-                  type="monotone" 
+                <Line
+                  type="monotone"
                   dataKey="produtividade" 
                   stroke="hsl(var(--primary))" 
                   strokeWidth={2}
@@ -441,15 +442,15 @@ export default function ProdutividadePage() {
                   {filteredDados.slice(-15).reverse().map((d) => (
                     <tr key={d.id} className="border-b hover:bg-muted/50">
                       <td className="py-3 px-4">
-                        {new Date(d.data).toLocaleDateString('pt-BR')}
+                        {d.data ? new Date(d.data).toLocaleDateString('pt-BR') : '-'}
                       </td>
                       <td className="py-3 px-4">{d.fazenda_nome || `Fazenda ${getFazendaId(d.fazenda)}`}</td>
                       <td className="py-3 px-4">
                         <Badge variant="outline">{d.cultura}</Badge>
                       </td>
-                      <td className="py-3 px-4 text-right">{d.area.toFixed(1)}</td>
+                      <td className="py-3 px-4 text-right">{(d.area ?? 0).toFixed(1)}</td>
                       <td className="py-3 px-4 text-right font-medium">
-                        {d.produtividade.toFixed(0)}
+                        {(d.produtividade ?? 0).toFixed(0)}
                       </td>
                     </tr>
                   ))}
