@@ -37,7 +37,7 @@ class OpenMeteoService:
             params = {
                 "latitude": latitude,
                 "longitude": longitude,
-                "current": "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m",
+                "current": "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,precipitation",
                 "hourly": "temperature_2m,relative_humidity_2m,precipitation,weather_code",
                 "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code",
                 "forecast_days": 7,
@@ -92,7 +92,7 @@ class OpenMeteoService:
             'temperatura_atual': current.get('temperature_2m'),
             'umidade_atual': current.get('relative_humidity_2m'),
             'vento_atual': current.get('wind_speed_10m'),
-            'chuva_hoje': current.get('precipitation_sum', 0),
+            'chuva_hoje': current.get('precipitation', 0) or (precip[0] if precip else 0),
             'previsao_7_dias': previsao,
             'atualizado_em': datetime.now(),
         }

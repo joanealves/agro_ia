@@ -6,7 +6,9 @@ class DadosClimaticos(models.Model):
     temperatura = models.FloatField()
     umidade = models.FloatField()
     precipitacao = models.FloatField()
-    data_coleta = models.DateTimeField(auto_now_add=True)  
+    velocidade_vento = models.FloatField(default=0)
+    e_previsao = models.BooleanField(default=False)
+    data_coleta = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Dados Climáticos - {self.data_coleta}"

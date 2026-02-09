@@ -13,7 +13,7 @@ import {
 } from 'recharts';
 import api from '../../lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
-import { Skeleton } from '../..//components/ui/skeleton';
+import { Skeleton } from '../../components/ui/skeleton';
 
 interface WeatherData {
     temperatura_atual: number;
@@ -92,7 +92,7 @@ export function WeatherCard({ fazendaId }: WeatherCardProps) {
                     <CardContent className="pt-4">
                         <div className="text-center">
                             <p className="text-sm text-gray-600">Temperatura</p>
-                            <p className="text-2xl font-bold">{weather.temperatura_atual.toFixed(1)}°C</p>
+                            <p className="text-2xl font-bold">{(weather.temperatura_atual ?? 0).toFixed(1)}°C</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -101,7 +101,7 @@ export function WeatherCard({ fazendaId }: WeatherCardProps) {
                     <CardContent className="pt-4">
                         <div className="text-center">
                             <p className="text-sm text-gray-600">Umidade</p>
-                            <p className="text-2xl font-bold">{weather.umidade_atual.toFixed(0)}%</p>
+                            <p className="text-2xl font-bold">{(weather.umidade_atual ?? 0).toFixed(0)}%</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -110,7 +110,7 @@ export function WeatherCard({ fazendaId }: WeatherCardProps) {
                     <CardContent className="pt-4">
                         <div className="text-center">
                             <p className="text-sm text-gray-600">Vento</p>
-                            <p className="text-2xl font-bold">{weather.vento_atual.toFixed(1)} km/h</p>
+                            <p className="text-2xl font-bold">{(weather.vento_atual ?? 0).toFixed(1)} km/h</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -119,7 +119,7 @@ export function WeatherCard({ fazendaId }: WeatherCardProps) {
                     <CardContent className="pt-4">
                         <div className="text-center">
                             <p className="text-sm text-gray-600">Chuva Hoje</p>
-                            <p className="text-2xl font-bold">{weather.chuva_hoje.toFixed(1)} mm</p>
+                            <p className="text-2xl font-bold">{(weather.chuva_hoje ?? 0).toFixed(1)} mm</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -130,7 +130,7 @@ export function WeatherCard({ fazendaId }: WeatherCardProps) {
                 <CardHeader>
                     <CardTitle>Previsão - 7 Dias</CardTitle>
                     <CardDescription>
-                        Atualizado em {new Date(weather.atualizado_em).toLocaleDateString('pt-BR', {
+                        Atualizado em {new Date(weather.atualizado_em).toLocaleString('pt-BR', {
                             dateStyle: 'short',
                             timeStyle: 'short',
                         })}
