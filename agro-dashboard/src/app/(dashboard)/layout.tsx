@@ -7,8 +7,8 @@
 
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../../app/providers/AuthProvider";
-import MainLayout from "../../components/layout/main-layout";
+import { useAuth } from "@/hooks/useAuth";
+import MainLayout from "@/components/layout/main-layout";
 
 // =============================================================================
 // DASHBOARD LAYOUT COMPONENT
@@ -19,18 +19,18 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { user, loading } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
 
   // Redireciona para login se não autenticado
   useEffect(() => {
-    if (!loading && !user) {
+    if (!isLoading && !user) {
       router.replace("/login");
     }
-  }, [user, loading, router]);
+  }, [user, isLoading, router]);
 
   // Loading state
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">

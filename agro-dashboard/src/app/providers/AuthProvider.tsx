@@ -1,218 +1,26 @@
-// "use client";
+'use client';
 
-// import { createContext, useContext, useEffect, useMemo, useState } from "react";
-// import Cookies from "js-cookie";
-// import { getCurrentUser, loginUser, logoutUser } from "../../lib/auth";
+import { ReactNode } from 'react';
+import { AuthContext, useAuthState, useAuth } from '@/hooks/useAuth';
 
-// interface User {
-//   id: string;
-//   name: string;
-//   email: string;
-//   role: "admin" | "user";
-//   username: string;
-// }
+/**
+ * AuthProvider - Fornece contexto de autenticação global
+ * Usa useAuthState hook que gerencia login/logout/refresh automático
+ * Disponibiliza useAuth() em qualquer componente filho
+ */
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const authState = useAuthState();
 
-// interface AuthContextType {
-//   user: User | null;
-//   loading: boolean;
-//   login: (email: string, password: string) => Promise<void>;
-//   logout: () => Promise<void>;
-//   refreshUser: () => Promise<void>;
-// }
-
-// const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// export function AuthProvider({ children }: { children: React.ReactNode }) {
-//   const [user, setUser] = useState<User | null>(null);
-//   const [loading, setLoading] = useState(true);
-
-//   // ✅ só carrega usuário
-//   const refreshUser = async () => {
-//     try {
-//       const token = Cookies.get("access_token");
-//       if (!token) {
-//         setUser(null);
-//         return;
-//       }
-
-//       const data = await getCurrentUser();
-//       setUser(data ?? null);
-//     } catch {
-//       setUser(null);
-//     }
-//   };
-
-//   // ✅ roda uma vez ao iniciar a app
-//   useEffect(() => {
-//     refreshUser().finally(() => setLoading(false));
-//   }, []);
-
-//   // ✅ login só faz login
-//   const login = async (email: string, password: string) => {
-//     setLoading(true);
-//     try {
-//       const data = await loginUser({ email, password });
-//       if (data?.user) setUser(data.user);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   // ✅ logout só limpa estado
-//   const logout = async () => {
-//     setLoading(true);
-//     try {
-//       await logoutUser();
-//     } finally {
-//       Cookies.remove("access_token");
-//       Cookies.remove("refresh_token");
-//       setUser(null);
-//       setLoading(false);
-//     }
-//   };
-
-//   const value = useMemo(
-//     () => ({ user, loading, login, logout, refreshUser }),
-//     [user, loading]
-//   );
-
-//   return (
-//     <AuthContext.Provider value={value}>
-//       {children}
-//     </AuthContext.Provider>
-//   );
-// }
-
-// export function useAuth() {
-//   const ctx = useContext(AuthContext);
-//   if (!ctx) throw new Error("useAuth deve ser usado dentro de AuthProvider");
-//   return ctx;
-// }
-
-
-
-
-
-
-
-
-
-"use client";
-
-// =============================================================================
-// AUTH PROVIDER - Contexto de autenticação global
-// =============================================================================
-
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  useCallback,
-  type ReactNode,
-} from "react";
-import Cookies from "js-cookie";
-import { getCurrentUser, loginUser, logoutUser } from "../../lib/auth";
-import type { User } from "../../types";
-
-// =============================================================================
-// TYPES
-// =============================================================================
-
-interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  refreshUser: () => Promise<void>;
-}
-
-// =============================================================================
-// CONTEXT
-// =============================================================================
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// =============================================================================
-// PROVIDER
-// =============================================================================
-
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  // Carrega usuário atual
-  const refreshUser = useCallback(async () => {
-    try {
-      const token = Cookies.get("access_token");
-      if (!token) {
-        setUser(null);
-        return;
-      }
-
-      const data = await getCurrentUser();
-      setUser(data);
-    } catch {
-      setUser(null);
-    }
-  }, []);
-
-  // Executa uma vez ao iniciar
-  useEffect(() => {
-    refreshUser().finally(() => setLoading(false));
-  }, [refreshUser]);
-
-  // Login
-  const login = useCallback(async (email: string, password: string) => {
-    setLoading(true);
-    try {
-      const data = await loginUser({ email, password });
-      if (data?.user) {
-        setUser(data.user);
-      } else {
-        // Se não veio user na resposta, busca
-        await refreshUser();
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [refreshUser]);
-
-  // Logout
-  const logout = useCallback(async () => {
-    setLoading(true);
-    try {
-      await logoutUser();
-    } finally {
-      Cookies.remove("access_token");
-      Cookies.remove("refresh_token");
-      setUser(null);
-      setLoading(false);
-    }
-  }, []);
-
-  // Memoiza o valor
-  const value = useMemo(
-    () => ({ user, loading, login, logout, refreshUser }),
-    [user, loading, login, logout, refreshUser]
+  return (
+    <AuthContext.Provider value={authState}>
+      {children}
+    </AuthContext.Provider>
   );
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// =============================================================================
-// HOOK
-// =============================================================================
+// Re-export useAuth para conveniência
+export { useAuth } from '@/hooks/useAuth';
 
-export function useAuth(): AuthContextType {
-  const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error("useAuth deve ser usado dentro de AuthProvider");
-  }
-  return ctx;
-}
+
+
+

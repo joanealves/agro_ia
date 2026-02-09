@@ -13,6 +13,7 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import { Button } from "../../../../components/ui/button";
 import { Input } from "../../../../components/ui/input";
+import dynamic from "next/dynamic";
 import {
   Card,
   CardContent,
@@ -34,34 +35,11 @@ import {
 } from "../../../../components/ui/tabs";
 import { DataTable } from "../../../../components/ui/data-table";
 
-import api from "../../../../lib/api";
+import api, { getFazendas } from "../../../../lib/api";
 
 // =============================================================================
-// MAP PLACEHOLDER
-// =============================================================================
-
-const MapComponent = () => (
-  <div className="w-full h-[500px] bg-muted relative rounded-md overflow-hidden flex items-center justify-center">
-    <div className="absolute top-4 left-4 z-10 p-2 bg-white rounded-md shadow-md">
-      <div className="flex gap-2">
-        <Button size="sm" variant="outline">
-          <Layers className="h-4 w-4 mr-1" />
-          Camadas
-        </Button>
-        <Button size="sm" variant="outline">
-          <Filter className="h-4 w-4 mr-1" />
-          Filtros
-        </Button>
-      </div>
-    </div>
-
-    <div className="text-center text-muted-foreground">
-      <Map className="h-12 w-12 mx-auto mb-2 text-primary" />
-      <p>Aqui seria renderizado o mapa real</p>
-      <p className="text-sm">(placeholder)</p>
-    </div>
-  </div>
-);
+// MAP EDITOR (dinâmico para evitar SSR)
+const MapEditor = dynamic(() => import("../../../../components/maps/MapEditor"), { ssr: false });
 
 // =============================================================================
 // TYPES
@@ -87,50 +65,70 @@ interface MapaData {
 export default function MapasPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [mapas, setMapas] = useState<MapaData[]>([]);
+  const [fazendas, setFazendas] = useState<any[]>([]);
+  const [selectedFazenda, setSelectedFazenda] = useState<any | null>(null);
   const [filtro, setFiltro] = useState("");
   const [selectedMapa, setSelectedMapa] = useState<MapaData | null>(null);
   const [showDialog, setShowDialog] = useState(false);
-
-  const [novoMapa, setNovoMapa] = useState({
-    nome: "",
-    latitude: 0,
-    longitude: 0,
-    zoom: 10,
-    fazenda_id: 1,
-  });
-
-  // =============================================================================
-  // FETCH
-  // =============================================================================
+  const [novoMapa, setNovoMapa] = useState({ nome: "", latitude: 0, longitude: 0, zoom: 10, fazenda_id: undefined as number | undefined });
 
   useEffect(() => {
+    const fetchFazendas = async () => {
+      const fazendasData = await getFazendas();
+      setFazendas(fazendasData);
+      if (fazendasData.length > 0) {
+        setSelectedFazenda(fazendasData[0]);
+      }
+    };
+    fetchFazendas();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedFazenda) {
+      setMapas([]);
+      setSelectedMapa(null);
+      return;
+    }
     const fetchMapas = async () => {
       try {
-        const response = await api.get("/maps/");
+        const response = await api.get(`/maps/fazenda/${selectedFazenda.id}/mapas/`);
         setMapas(response.data);
         if (response.data.length > 0) {
           setSelectedMapa(response.data[0]);
+        } else {
+          setSelectedMapa(null);
         }
       } catch (error) {
-        console.error("Erro ao carregar mapas:", error);
+        setMapas([]);
+        setSelectedMapa(null);
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchMapas();
-  }, []);
-
-  // =============================================================================
-  // ACTIONS
-  // =============================================================================
+  }, [selectedFazenda]);
 
   const handleCreate = async () => {
     try {
-      const response = await api.post("/maps/", novoMapa);
+      let fazendaId = novoMapa.fazenda_id;
+      if (!fazendaId) {
+        if (mapas.length > 0) {
+          fazendaId = mapas[0].fazenda.id;
+        } else {
+          alert("Nenhuma fazenda disponível para associar ao mapa. Cadastre uma fazenda primeiro.");
+          return;
+        }
+      }
+      const response = await api.post(`/maps/fazenda/${fazendaId}/mapas/`, {
+        nome: novoMapa.nome,
+        latitude: novoMapa.latitude,
+        longitude: novoMapa.longitude,
+        zoom: novoMapa.zoom,
+      });
       setMapas((prev) => [...prev, response.data]);
       setSelectedMapa(response.data);
       setShowDialog(false);
+      setNovoMapa({ nome: "", latitude: 0, longitude: 0, zoom: 10, fazenda_id: fazendaId });
     } catch (error) {
       console.error("Erro ao criar mapa:", error);
     }
@@ -141,10 +139,6 @@ export default function MapasPage() {
       item.nome.toLowerCase().includes(filtro.toLowerCase()) ||
       item.fazenda.nome.toLowerCase().includes(filtro.toLowerCase())
   );
-
-  // =============================================================================
-  // TABLE COLUMNS (TanStack v8 ✔)
-  // =============================================================================
 
   const columns: ColumnDef<MapaData>[] = [
     {
@@ -188,10 +182,6 @@ export default function MapasPage() {
     },
   ];
 
-  // =============================================================================
-  // LOADING
-  // =============================================================================
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -202,11 +192,6 @@ export default function MapasPage() {
       </div>
     );
   }
-
-  // =============================================================================
-  // RENDER
-  // =============================================================================
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -217,12 +202,31 @@ export default function MapasPage() {
             Visualize e gerencie os mapas das fazendas.
           </p>
         </div>
-
-        <Button onClick={() => setShowDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Novo mapa
-        </Button>
+        {fazendas.length > 0 && selectedFazenda && (
+          <Button onClick={() => setShowDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Novo mapa
+          </Button>
+        )}
       </div>
+
+      {/* Seleção de Fazenda */}
+      {fazendas.length > 0 && (
+        <div className="mb-4">
+          <label className="mr-2">Fazenda:</label>
+          <select
+            value={selectedFazenda?.id || ''}
+            onChange={e => {
+              const fazenda = fazendas.find(f => f.id === Number(e.target.value));
+              setSelectedFazenda(fazenda || null);
+            }}
+          >
+            {fazendas.map(fazenda => (
+              <option key={fazenda.id} value={fazenda.id}>{fazenda.nome}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Filtro */}
       <div className="relative w-64">
@@ -253,7 +257,13 @@ export default function MapasPage() {
         <TabsContent value="mapa">
           <Card>
             <CardContent className="pt-6">
-              <MapComponent />
+              {selectedFazenda && selectedFazenda.id ? (
+                <MapEditor fazendaId={selectedFazenda.id} />
+              ) : (
+                <div className="w-full h-[500px] flex items-center justify-center text-muted-foreground">
+                  Cadastre e selecione uma fazenda para visualizar mapas.
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -265,56 +275,12 @@ export default function MapasPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Novo mapa</AlertDialogTitle>
             <AlertDialogDescription>
-              Informe os dados do novo mapa.
+              Para criar um novo mapa, feche este diálogo e desenhe uma área ou marcador diretamente no mapa abaixo.
             </AlertDialogDescription>
           </AlertDialogHeader>
-
-          <div className="space-y-4">
-            <Input
-              placeholder="Nome"
-              value={novoMapa.nome}
-              onChange={(e) =>
-                setNovoMapa({ ...novoMapa, nome: e.target.value })
-              }
-            />
-            <Input
-              type="number"
-              placeholder="Latitude"
-              value={novoMapa.latitude}
-              onChange={(e) =>
-                setNovoMapa({
-                  ...novoMapa,
-                  latitude: Number(e.target.value),
-                })
-              }
-            />
-            <Input
-              type="number"
-              placeholder="Longitude"
-              value={novoMapa.longitude}
-              onChange={(e) =>
-                setNovoMapa({
-                  ...novoMapa,
-                  longitude: Number(e.target.value),
-                })
-              }
-            />
-            <Input
-              type="number"
-              placeholder="Zoom"
-              value={novoMapa.zoom}
-              onChange={(e) =>
-                setNovoMapa({
-                  ...novoMapa,
-                  zoom: Number(e.target.value),
-                })
-              }
-            />
-          </div>
-
           <AlertDialogFooter>
-            <AlertDialogAction onClick={handleCreate}>
-              Criar mapa
+            <AlertDialogAction onClick={() => setShowDialog(false)}>
+              Ok
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

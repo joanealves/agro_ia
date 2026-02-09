@@ -13,11 +13,6 @@ load_dotenv(BASE_DIR / ".env")
 # (se quiser manter)
 sys.path.append(str(BASE_DIR))
 
-
-print(">>> DB_USER =", os.getenv("DB_USER"))
-print(">>> DB_PASSWORD existe?", bool(os.getenv("DB_PASSWORD")))
-print(">>> ENV FILE PATH =", os.getcwd())
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(BASE_DIR))
@@ -57,6 +52,7 @@ INSTALLED_APPS = [
     'backend.notificacoes',
     'backend.maps',
     'backend.fazenda',
+    'backend.talhoes',  # ✅ NOVO: Talhões
 ]
 
 # ✅ IMPORTANTE: Definir modelo de usuário customizado
@@ -145,7 +141,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = os.getenv(
-    'CORS_ALLOWED_ORIGINS', 
+    'CORS_ALLOWED_ORIGINS',
     'http://localhost:3000'
 ).split(',')
 
@@ -154,8 +150,17 @@ if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = False  # Manter False por segurança
     CORS_ALLOWED_ORIGINS.extend([
         'http://localhost:3000',
+        'http://localhost:3001',
         'http://127.0.0.1:3000',
+        'http://127.0.0.1:3001',
     ])
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:3001',
+]
 
 CORS_ALLOW_METHODS = [
     'DELETE',
@@ -225,6 +230,15 @@ if os.getenv('REDIS_URL'):
     CELERY_TASK_SERIALIZER = 'json'
     CELERY_RESULT_SERIALIZER = 'json'
     CELERY_TIMEZONE = TIME_ZONE
+    
+    # ✅ Agendamento de tasks periódicas
+    from celery.schedules import crontab
+    CELERY_BEAT_SCHEDULE = {
+        'update-weather-every-6h': {
+            'task': 'irrigacao.fetch_weather_all_fazendas',
+            'schedule': crontab(minute=0, hour='*/6'),  # Execute às 0, 6, 12, 18 horas
+        },
+    }
 
 # ======================================================================
 # 🔒 CONFIGURAÇÕES DE SEGURANÇA ADICIONAIS PARA PRODUÇÃO
@@ -273,5 +287,20 @@ LOGGING = {
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': False,
         },
+    },
+}
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
     },
 }

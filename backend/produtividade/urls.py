@@ -1,8 +1,10 @@
-from django.urls import path
-from .views import DadosProdutividadeView, ListDadosProdutividadeView, ProdutividadeSerieTemporalView
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import DadosProdutividadeViewSet
+
+router = DefaultRouter()
+router.register(r'', DadosProdutividadeViewSet, basename='dados-produtividade')
 
 urlpatterns = [
-    path('dados/', DadosProdutividadeView.as_view(), name='dados-produtividade'),
-    path('list/', ListDadosProdutividadeView.as_view(), name='list-dados-produtividade'),
-    path('serie-temporal/', ProdutividadeSerieTemporalView.as_view(), name='serie-temporal'),
+    path('', include(router.urls)),
 ]

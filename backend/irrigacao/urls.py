@@ -1,12 +1,17 @@
-from django.urls import path
+from django.urls import path, include
 from django.http import JsonResponse
-from .views import ConsultaClimaView, SugestaoIrrigacaoView  
+from rest_framework.routers import DefaultRouter
+from .views import ClimaViewSet, IrrigacaoViewSet
 
 def irrigacao_home(request):
     return JsonResponse({"message": "Bem-vindo ao sistema de irrigação!"})
 
+router = DefaultRouter()
+
+router.register(r'clima', ClimaViewSet, basename='clima')
+router.register(r'irrigacao', IrrigacaoViewSet, basename='irrigacao')
+
 urlpatterns = [
     path('', irrigacao_home, name='irrigacao-home'),
-    path('clima/', ConsultaClimaView.as_view(), name='consulta-clima'),
-    path('sugestao-irrigacao/<int:fazenda_id>/', SugestaoIrrigacaoView.as_view(), name='sugestao-irrigacao'),
+    path('', include(router.urls)),
 ]

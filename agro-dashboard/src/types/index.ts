@@ -1,17 +1,28 @@
 // =============================================================================
-// TYPES - Tipos centralizados do projeto AgroIA Dashboard
-// =============================================================================
-
-// =============================================================================
 // USER & AUTH
 // =============================================================================
+
+// Tipo unificado para roles de usuário
+export type UserRole = "admin" | "user" | "tecnico" | "auditor";
 
 export interface User {
   id: number;
   name: string;
   email: string;
   username: string;
-  role: "admin" | "user";
+  role: UserRole;
+  is_staff?: boolean;
+  is_active?: boolean;
+  created_at?: string;
+}
+
+// Tipo para formulário de usuário (aceita todos os roles)
+export interface UserFormData {
+  name: string;
+  username: string;
+  email: string;
+  password: string;
+  role: UserRole;
 }
 
 export interface LoginData {
@@ -24,7 +35,7 @@ export interface RegisterData {
   username: string;
   email: string;
   password: string;
-  role?: "admin" | "user";
+  role?: UserRole;
 }
 
 export interface AuthResponse {
@@ -51,9 +62,11 @@ export interface Fazenda {
   longitude: number;
   localizacao: string;
   usuario?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export type FazendaCreate = Omit<Fazenda, "id" | "usuario">;
+export type FazendaCreate = Omit<Fazenda, "id" | "usuario" | "created_at" | "updated_at">;
 export type FazendaUpdate = Partial<FazendaCreate>;
 
 // =============================================================================
@@ -78,18 +91,23 @@ export interface ClimaResumo {
 
 // =============================================================================
 // PRAGAS
+// IMPORTANTE: Backend usa campo 'nivel' (baixo/medio/alto), não 'status'
 // =============================================================================
+
+// Níveis de severidade de pragas conforme banco de dados
+export type NivelPraga = "baixo" | "medio" | "alto";
 
 export interface Praga {
   id: number;
   fazenda: number;
   fazenda_nome?: string;
-  usuario: number;
+  usuario?: number;
   nome: string;
   descricao: string;
   imagem?: string;
-  data_criacao: string;
-  status: "pendente" | "resolvido";
+  data_registro: string;
+  // CORREÇÃO: Campo correto é 'nivel', não 'status'
+  nivel: NivelPraga;
 }
 
 export interface PragaCreate {
@@ -97,58 +115,44 @@ export interface PragaCreate {
   nome: string;
   descricao: string;
   imagem?: File | string;
-  status?: "pendente" | "resolvido";
+  // CORREÇÃO: Campo correto é 'nivel'
+  nivel?: NivelPraga;
 }
 
 export type PragaUpdate = Partial<PragaCreate>;
+
+// Helper para converter status legado para nivel
+export function statusToNivel(status?: string): NivelPraga {
+  switch (status) {
+    case "resolvido":
+      return "baixo";
+    case "pendente":
+    default:
+      return "medio";
+  }
+}
 
 // =============================================================================
 // PRODUTIVIDADE
 // =============================================================================
 
-// =============================================================================
-// PRODUTIVIDADE - Substitua esta seção no seu types.ts
-// =============================================================================
-
 export interface DadosProdutividade {
   id: number;
-  cultura: string;
-  area: number;
-  produtividade: number;
-  data: string;
-  // Fazenda como objeto completo (retornado pelo GET)
-  fazenda: {
-    id: number;
-    nome: string;
-  };
-  // Campos opcionais para compatibilidade
-  fazenda_id?: number;
+  fazenda: number;
   fazenda_nome?: string;
-}
-
-export interface ProdutividadeCreate {
   cultura: string;
   area: number;
   produtividade: number;
-  fazenda_id: number;
   data: string;
+  safra?: string;
+  talhao_id?: number;
 }
-
-export type ProdutividadeUpdate = Partial<ProdutividadeCreate>;
 
 export interface ProdutividadeResumo {
   fazenda__nome: string;
   media_produtividade: number;
 }
 
-export interface ProdutividadeSeriesTemporal {
-  dados: Array<{
-    data: string;
-    produtividade: number;
-    cultura: string;
-  }>;
-  total_registros: number;
-}
 // =============================================================================
 // MAPAS
 // =============================================================================
@@ -156,37 +160,161 @@ export interface ProdutividadeSeriesTemporal {
 export interface Mapa {
   id: number;
   fazenda: number;
+  fazenda_nome?: string;
   nome: string;
   latitude: number;
   longitude: number;
   zoom: number;
+  camadas?: any; // GeoJSON ou estrutura de camadas
+  camadas_ativas?: any; // Adicionada para suportar camadas ativas
+  data_criacao?: string;
+  data_atualizacao?: string;
 }
 
 // =============================================================================
 // NOTIFICAÇÕES
 // =============================================================================
 
+export type TipoNotificacao = "email" | "whatsapp" | "push" | "sistema";
+
 export interface Notificacao {
   id: number;
   usuario: number;
   mensagem: string;
-  tipo: "email" | "whatsapp";
+  tipo: TipoNotificacao;
   enviada_em: string;
   lida: boolean;
+  titulo?: string;
+  link?: string;
 }
 
 // =============================================================================
 // IRRIGAÇÃO
 // =============================================================================
 
+export type StatusIrrigacao = "agendada" | "em_andamento" | "concluida" | "cancelada";
+
 export interface Irrigacao {
   id: number;
   fazenda: number;
   fazenda_nome?: string;
-  data: string;
-  quantidade_agua: number;
-  duracao: number;
-  status: "agendada" | "em_andamento" | "concluida" | "cancelada";
+  nome: string;
+  status: StatusIrrigacao;
+  data?: string;
+  quantidade_agua?: number;
+  duracao?: number;
+  created_at?: string;
+}
+
+export interface IrrigacaoHistorico {
+  id: number;
+  irrigacao_id: number;
+  status: StatusIrrigacao;
+  volume_agua?: number;
+  duracao_minutos?: number;
+  data_evento: string;
+}
+
+// =============================================================================
+// TALHÕES (NOVO - Sprint 1)
+// Core do produto agrícola
+// =============================================================================
+
+export interface Talhao {
+  id: string; // UUID
+  fazenda_id: number;
+  fazenda_nome?: string;
+  nome: string;
+  codigo?: string;
+  // Geometria GeoJSON para PostGIS
+  geometria?: GeoJSONPolygon;
+  area_hectares: number;
+  cultura_atual?: string;
+  safra_atual?: string;
+  responsavel_tecnico_id?: number;
+  responsavel_tecnico_nome?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TalhaoCreate {
+  fazenda_id: number;
+  nome: string;
+  codigo?: string;
+  geometria?: GeoJSONPolygon;
+  area_hectares?: number;
+  cultura_atual?: string;
+  safra_atual?: string;
+  responsavel_tecnico_id?: number;
+}
+
+export type TalhaoUpdate = Partial<TalhaoCreate>;
+
+// =============================================================================
+// SAFRAS (NOVO - Sprint 2)
+// =============================================================================
+
+export interface Safra {
+  id: string; // UUID
+  nome: string; // Ex: "2025/2026"
+  ano_inicio: number;
+  ano_fim: number;
+  data_inicio?: string;
+  data_fim?: string;
+  ativa: boolean;
+  created_at: string;
+}
+
+export interface SafraTalhao {
+  id: string;
+  safra_id: string;
+  talhao_id: string;
+  cultura: string;
+  area_plantada: number;
+  data_plantio?: string;
+  data_colheita?: string;
+  produtividade_estimada?: number;
+  produtividade_real?: number;
+  status: "planejado" | "plantado" | "em_desenvolvimento" | "colhido";
+}
+
+// =============================================================================
+// APLICAÇÕES (NOVO - Sprint 3)
+// Rastreabilidade de defensivos/fertilizantes
+// =============================================================================
+
+export type TipoAplicacao = "defensivo" | "fertilizante" | "corretivo" | "herbicida" | "fungicida" | "inseticida";
+
+export interface Aplicacao {
+  id: string;
+  talhao_id: string;
+  talhao_nome?: string;
+  safra_id: string;
+  tipo: TipoAplicacao;
+  produto: string;
+  dose: number;
+  unidade_dose: string; // L/ha, kg/ha, etc
+  data_aplicacao: string;
+  responsavel_id: number;
+  responsavel_nome?: string;
+  observacoes?: string;
+  // Geometria da área aplicada (pode ser diferente do talhão inteiro)
+  geometria_aplicacao?: GeoJSONPolygon;
+  created_at: string;
+}
+
+// =============================================================================
+// GEOJSON TYPES
+// =============================================================================
+
+export interface GeoJSONPolygon {
+  type: "Polygon";
+  coordinates: number[][][];
+}
+
+export interface GeoJSONPoint {
+  type: "Point";
+  coordinates: [number, number]; // [longitude, latitude]
 }
 
 // =============================================================================
@@ -198,7 +326,9 @@ export interface DashboardData {
   total_irrigacoes: number;
   total_pragas: number;
   total_fazendas: number;
+  total_talhoes?: number;
   total_notificacoes: number;
+  notificacoes_nao_lidas?: number;
   clima: ClimaResumo;
   produtividade: ProdutividadeResumo[];
 }
@@ -216,6 +346,7 @@ export interface ChartDataPoint {
 export interface BarChartData {
   name: string;
   total: number;
+  color?: string;
 }
 
 // =============================================================================
@@ -226,6 +357,7 @@ export interface ApiError {
   detail?: string;
   message?: string;
   errors?: Record<string, string[]>;
+  status?: number;
 }
 
 export interface PaginatedResponse<T> {
@@ -233,4 +365,30 @@ export interface PaginatedResponse<T> {
   next: string | null;
   previous: string | null;
   results: T[];
+}
+
+// =============================================================================
+// FILTROS
+// =============================================================================
+
+export interface FiltrosPragas {
+  fazenda?: number;
+  nivel?: NivelPraga;
+  dataInicio?: string;
+  dataFim?: string;
+  search?: string;
+}
+
+export interface FiltrosProdutividade {
+  fazenda?: number;
+  cultura?: string;
+  safra?: string;
+  dataInicio?: string;
+  dataFim?: string;
+}
+
+export interface FiltrosClima {
+  fazenda?: number;
+  dataInicio?: string;
+  dataFim?: string;
 }

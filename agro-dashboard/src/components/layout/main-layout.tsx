@@ -11,7 +11,7 @@
 // }
 
 // export default function MainLayout({ children }: MainLayoutProps) {
-//   const { user, loading } = useAuth();
+//   const { user, isLoading } = useAuth();
 //   const [sidebarOpen, setSidebarOpen] = useState(false);
 //   const pathname = usePathname();
 
@@ -81,7 +81,7 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Sidebar from "../../components/layout/Sidebar";
 import Header from "../../components/layout/Header";
-import { useAuth } from "../../app/providers/AuthProvider";
+import { useAuth } from "@/hooks/useAuth";
 
 // =============================================================================
 // TYPES
@@ -96,7 +96,7 @@ interface MainLayoutProps {
 // =============================================================================
 
 export default function MainLayout({ children }: MainLayoutProps) {
-  const { user, loading } = useAuth();
+  const { user, isLoading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
 
@@ -106,7 +106,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   }, [pathname]);
 
   // Loading state
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <div className="flex flex-col items-center gap-4">
@@ -144,9 +144,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
       {/* Sidebar Mobile */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 transform transition-transform duration-200 ease-in-out md:hidden ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 transform transition-transform duration-200 ease-in-out md:hidden ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <Sidebar />
       </div>
