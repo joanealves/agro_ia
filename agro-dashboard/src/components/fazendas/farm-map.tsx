@@ -139,6 +139,7 @@ export function FarmMap({
     });
 
     // Importa CSS do Leaflet
+    // @ts-ignore - CSS import não tem declaração de tipo
     import("leaflet/dist/leaflet.css");
   }, []);
 
