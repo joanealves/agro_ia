@@ -322,9 +322,9 @@ export async function getClimaResumo(): Promise<{ temp_media: number; umidade_me
 
 export async function getIrrigacoes(fazendaId?: number): Promise<Irrigacao[]> {
   try {
-    const url = fazendaId 
-      ? `/api/irrigacao/irrigacoes/?fazenda=${fazendaId}` 
-      : "/api/irrigacao/irrigacoes/";
+    const url = fazendaId
+      ? `/api/irrigacao/irrigacao/?fazenda=${fazendaId}`
+      : "/api/irrigacao/irrigacao/";
     const response: AxiosResponse = await api.get(url);
     return extractData<Irrigacao>(response.data);
   } catch (error) {
@@ -335,7 +335,7 @@ export async function getIrrigacoes(fazendaId?: number): Promise<Irrigacao[]> {
 
 export async function getIrrigacao(id: number): Promise<Irrigacao | null> {
   try {
-    const { data } = await api.get<Irrigacao>(`/api/irrigacao/irrigacoes/${id}/`);
+    const { data } = await api.get<Irrigacao>(`/api/irrigacao/irrigacao/${id}/`);
     return data;
   } catch (error) {
     logError("getIrrigacao", error);

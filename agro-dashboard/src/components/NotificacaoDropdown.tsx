@@ -50,24 +50,31 @@ export function NotificacaoDropdown({ className = '' }: NotificacaoDropdownProps
     useEffect(() => {
         if (!user) return;
 
+        let falhasConsecutivas = 0;
+
         const buscarNotificacoes = async () => {
             try {
                 setCarregando(true);
-                const response = await api.get('/api/notificacoes/recentes/');
+                const [response, countResponse] = await Promise.all([
+                    api.get('/api/notificacoes/recentes/'),
+                    api.get('/api/notificacoes/contagem/'),
+                ]);
                 setNotificacoes(response.data);
-
-                // Buscar contagem de não lidas
-                const countResponse = await api.get('/api/notificacoes/contagem/');
-                setNaoLidas(countResponse.data.count);
-            } catch (err) {
-                console.error('Erro ao buscar notificações:', err);
+                setNaoLidas(countResponse.data.count ?? 0);
+                falhasConsecutivas = 0;
+            } catch {
+                falhasConsecutivas++;
+                // Silenciar após 3 falhas consecutivas para não poluir console
+                if (falhasConsecutivas <= 3) {
+                    console.warn(`[Notificações] Falha ao buscar (${falhasConsecutivas}/3)`);
+                }
             } finally {
                 setCarregando(false);
             }
         };
 
         buscarNotificacoes();
-        const interval = setInterval(buscarNotificacoes, 30000); // Atualizar a cada 30s
+        const interval = setInterval(buscarNotificacoes, 30000);
 
         return () => clearInterval(interval);
     }, [user]);

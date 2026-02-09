@@ -53,10 +53,20 @@ export default function LoginPage() {
 
   return (
 
-    <div className="min-h-screen bg-background flex">
-      {/* Lado esquerdo - Área de login */}
-      <div className="w-full md:w-1/2 flex items-center justify-center p-8">
-        <Card className="w-full max-w-md border-none bg-card/50 backdrop-blur-sm">
+    <div className="min-h-screen w-full relative flex items-center justify-center">
+      {/* Imagem de fundo ocupando toda a tela */}
+      <Image
+        src="/bg-login.png"
+        alt="Login Background"
+        fill
+        className="object-cover opacity-50 z-0"
+        priority
+      />
+      {/* Overlay para escurecer um pouco o fundo */}
+      <div className="absolute inset-0 bg-black/40 z-10" />
+      {/* Formulário centralizado */}
+      <div className="relative z-20 w-full max-w-md flex items-center justify-center p-8">
+        <Card className="w-full border-none bg-card/60 backdrop-blur-sm">
           <CardHeader className="space-y-1">
             <div className="flex items-center justify-center mb-4">
               <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
@@ -153,35 +163,14 @@ export default function LoginPage() {
         </Card>
       </div>
 
-      {/* Lado direito - Imagem de fundo e overlay */}
-      <div className="hidden md:block w-1/2 relative bg-black">
-        <div className="absolute inset-0 bg-gradient-to-r from-background to-transparent z-10" />
-        <div className="absolute inset-0">
-          <Image
-            src="/images/login-background.jpg"
-            alt="Login"
-            fill
-            className="object-cover opacity-50"
-            priority
-            onError={() => {
-              // Fallback para placeholder se a imagem não carregar
-              const imgElement = document.querySelector('.login-bg') as HTMLImageElement;
-              if (imgElement) {
-                imgElement.src = "/api/placeholder/1200/800";
-              }
-            }}
-          />
-        </div>
-        <div className="relative z-20 h-full flex items-center justify-center p-12">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Bem-vindo ao Futuro do Agronegócio
-            </h2>
-            <p className="text-lg text-gray-200 max-w-md">
-              Gerencie sua fazenda de forma inteligente e eficiente com nossa plataforma moderna.
-            </p>
-          </div>
-        </div>
+      {/* Mensagem de boas-vindas abaixo do formulário */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 text-center">
+        <h2 className="text-3xl font-bold text-white mb-4">
+          Bem-vindo ao Futuro do Agronegócio
+        </h2>
+        <p className="text-lg text-gray-200 max-w-md mx-auto">
+          Gerencie sua fazenda de forma inteligente e eficiente com nossa plataforma moderna.
+        </p>
       </div>
     </div>
   )
