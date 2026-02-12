@@ -1,21 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Map, Plus, RefreshCw, Loader2 } from "lucide-react";
-import { Button } from "../../../../components/ui/button";
+import { Map, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../../../components/ui/card";
 import { TalhaoList } from "../../../../components/dashboard/TalhaoList";
 import { TalhaoMap } from "../../../../components/dashboard/TalhaoMap";
-import { useAuth } from "@/hooks/useAuth";
 import api from "../../../../lib/api";
 
 interface Fazenda {
     id: number;
     nome: string;
+    latitude?: number;
+    longitude?: number;
 }
 
 export default function TalhoesPage() {
-    const { user } = useAuth();
     const [fazendas, setFazendas] = useState<Fazenda[]>([]);
     const [selectedFazenda, setSelectedFazenda] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
@@ -101,8 +100,8 @@ export default function TalhoesPage() {
                         <CardContent className="h-[400px]">
                             <TalhaoMap
                                 fazendaId={selectedFazenda}
-                                latitude={-23.55}
-                                longitude={-46.63}
+                                latitude={fazendas.find(f => f.id === selectedFazenda)?.latitude ?? -23.55}
+                                longitude={fazendas.find(f => f.id === selectedFazenda)?.longitude ?? -46.63}
                             />
                         </CardContent>
                     </Card>

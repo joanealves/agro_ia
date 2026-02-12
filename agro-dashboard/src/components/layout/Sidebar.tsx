@@ -17,6 +17,7 @@ import {
   Droplets,
   Users,
   Leaf,
+  Layers,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import {
@@ -40,12 +41,13 @@ const menuItems: MenuItem[] = [
   { title: "Pragas", path: "/dashboard/pragas", icon: Bug },
   { title: "Produtividade", path: "/dashboard/produtividade", icon: BarChart3 },
   { title: "Irrigação", path: "/dashboard/irrigacao", icon: Droplets },
+  { title: "Mapas", path: "/dashboard/mapas", icon: Layers },
   { title: "Notificações", path: "/dashboard/notificacoes", icon: Bell },
 ];
 
 const adminMenuItems: MenuItem[] = [
   { title: "Usuários", path: "/dashboard/admin/usuarios", icon: Users },
-  { title: "Configurações", path: "/dashboard/admin/configuracoes", icon: Settings },
+  { title: "Configurações", path: "/dashboard/configuracoes", icon: Settings },
 ];
 
 interface SidebarItemProps {
