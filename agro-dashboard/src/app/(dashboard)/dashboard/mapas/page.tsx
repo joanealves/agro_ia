@@ -91,7 +91,7 @@ export default function MapasPage() {
     }
     const fetchMapas = async () => {
       try {
-        const response = await api.get(`/maps/fazenda/${selectedFazenda.id}/mapas/`);
+        const response = await api.get(`/api/mapas/fazenda/${selectedFazenda.id}/mapas/`);
         setMapas(response.data);
         if (response.data.length > 0) {
           setSelectedMapa(response.data[0]);
@@ -119,7 +119,7 @@ export default function MapasPage() {
           return;
         }
       }
-      const response = await api.post(`/maps/fazenda/${fazendaId}/mapas/`, {
+      const response = await api.post(`/api/mapas/fazenda/${fazendaId}/mapas/`, {
         nome: novoMapa.nome,
         latitude: novoMapa.latitude,
         longitude: novoMapa.longitude,

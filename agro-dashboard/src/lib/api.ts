@@ -371,13 +371,13 @@ export async function getProdutividadeResumo(): Promise<{ fazenda__nome: string;
 }
 
 // =============================================================================
-// MAPAS - /api/maps/
+// MAPAS - /api/mapas/
 // =============================================================================
 
 // MAPAS CRUD
 export async function getMapas(fazendaId: number): Promise<Mapa[]> {
   try {
-    const response: AxiosResponse = await api.get(`/api/maps/fazenda/${fazendaId}/mapas/`);
+    const response: AxiosResponse = await api.get(`/api/mapas/fazenda/${fazendaId}/mapas/`);
     return response.data;
   } catch (error) {
     logError("getMapas", error);
@@ -387,7 +387,7 @@ export async function getMapas(fazendaId: number): Promise<Mapa[]> {
 
 export async function getMapa(fazendaId: number, mapaId: number): Promise<Mapa | null> {
   try {
-    const { data } = await api.get<Mapa>(`/api/maps/fazenda/${fazendaId}/mapas/${mapaId}/`);
+    const { data } = await api.get<Mapa>(`/api/mapas/fazenda/${fazendaId}/mapas/${mapaId}/`);
     return data;
   } catch (error) {
     logError("getMapa", error);
@@ -396,17 +396,17 @@ export async function getMapa(fazendaId: number, mapaId: number): Promise<Mapa |
 }
 
 export async function createMapa(fazendaId: number, mapa: Partial<Mapa>): Promise<Mapa> {
-  const { data } = await api.post<Mapa>(`/api/maps/fazenda/${fazendaId}/mapas/`, mapa);
+  const { data } = await api.post<Mapa>(`/api/mapas/fazenda/${fazendaId}/mapas/`, mapa);
   return data;
 }
 
 export async function updateMapa(fazendaId: number, mapaId: number, mapa: Partial<Mapa>): Promise<Mapa> {
-  const { data } = await api.put<Mapa>(`/api/maps/fazenda/${fazendaId}/mapas/${mapaId}/`, mapa);
+  const { data } = await api.put<Mapa>(`/api/mapas/fazenda/${fazendaId}/mapas/${mapaId}/`, mapa);
   return data;
 }
 
 export async function deleteMapa(fazendaId: number, mapaId: number): Promise<void> {
-  await api.delete(`/api/maps/fazenda/${fazendaId}/mapas/${mapaId}/`);
+  await api.delete(`/api/mapas/fazenda/${fazendaId}/mapas/${mapaId}/`);
 }
 
 // =============================================================================
